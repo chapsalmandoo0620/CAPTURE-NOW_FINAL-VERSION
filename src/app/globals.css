@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-green: #39FF14;
+  --color-black: #000000;
+  --font-sans: 'Pretendard', sans-serif;
+}
+
+/* Custom Utilities if needed */
+@layer components {
+  .btn-neon {
+    @apply bg-neon-green text-black font-bold py-3 px-6 rounded-xl transition-all hover:bg-neon-green/80 active:scale-95;
+  }
+}
+
+body {
+  background-color: var(--color-black);
+  color: white;
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #39FF14;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #32D612;
+}
+
+/* Hide scrollbar for specific elements if needed using utility class */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
