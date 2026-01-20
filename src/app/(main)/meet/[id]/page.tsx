@@ -199,8 +199,8 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
             });
 
         if (feedError) {
-            console.error("Feedback error:", feedError);
-            alert("Error submitting feedback.");
+            console.error("Feedback error details:", feedError);
+            alert(`Failed to submit feedback: ${feedError.message || 'Unknown error'} (Hint: Check DB permissions)`);
             return;
         }
 

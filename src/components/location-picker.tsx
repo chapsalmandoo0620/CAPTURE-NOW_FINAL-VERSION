@@ -13,9 +13,11 @@ interface LocationPickerProps {
 }
 
 export default function LocationPicker({ onLocationSelect, initialLat, initialLng }: LocationPickerProps) {
-    const { isLoaded } = useJsApiLoader({
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+
+    const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        googleMapsApiKey: apiKey,
         libraries
     });
 
@@ -73,6 +75,18 @@ export default function LocationPicker({ onLocationSelect, initialLat, initialLn
     const onLoadSearchBox = (ref: google.maps.places.SearchBox) => {
         searchBoxRef.current = ref;
     };
+
+    if (!apiKey) {
+        return <div className="w-full h-64 bg-gray-900 rounded-xl flex items-center justify-center text-red-500 text-sm p-4 text-center border border-red-900/50">
+            Google Maps API Key Missing.<br />Please check .env.local
+        </div>;
+    }
+
+    if (loadError) {
+        return <div className="w-full h-64 bg-gray-900 rounded-xl flex items-center justify-center text-red-500 text-sm p-4 text-center border border-red-900/50">
+            Map Load Error: {loadError.message}
+        </div>;
+    }
 
     if (!isLoaded) return <div className="w-full h-64 bg-gray-900 rounded-xl animate-pulse flex items-center justify-center text-gray-500">Loading Map...</div>;
 
