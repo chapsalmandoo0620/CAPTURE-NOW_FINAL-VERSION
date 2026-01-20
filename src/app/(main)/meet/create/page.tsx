@@ -4,10 +4,23 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { ChevronLeft, Calendar, Clock, MapPin, Users, Activity, Smile, ArrowRight } from 'lucide-react';
+import LocationPicker from '@/components/location-picker';
 
 export default function CreateMeetPage() {
     const router = useRouter();
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        title: string;
+        sport: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        location: string;
+        latitude?: number;
+        longitude?: number;
+        maxParticipants: number;
+        level: string;
+        vibe: string;
+    }>({
         title: '',
         sport: 'Running',
         date: '',
@@ -27,6 +40,15 @@ export default function CreateMeetPage() {
         setFormData({ ...formData, sport });
     };
 
+    const handleLocationSelect = (lat: number, lng: number, address?: string) => {
+        setFormData(prev => ({
+            ...prev,
+            latitude: lat,
+            longitude: lng,
+            location: address ? address : prev.location
+        }));
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -35,6 +57,11 @@ export default function CreateMeetPage() {
 
         if (!user) {
             alert('You must be logged in to create a session.');
+            return;
+        }
+
+        if (!formData.latitude || !formData.longitude) {
+            alert('Please select a location on the map.');
             return;
         }
 
@@ -51,6 +78,8 @@ export default function CreateMeetPage() {
                 start_time: startDateTime,
                 end_time: endDateTime,
                 location_name: formData.location,
+                latitude: formData.latitude,
+                longitude: formData.longitude,
                 max_participants: parseInt(formData.maxParticipants as any),
                 level: formData.level,
                 vibe_tag: formData.vibe,
@@ -184,24 +213,18 @@ export default function CreateMeetPage() {
                         <label className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
                             <MapPin size={14} /> Location
                         </label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                required
-                                placeholder="Search location..."
-                                className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-4 pr-10 py-3 focus:border-neon-green focus:outline-none transition-colors"
-                            />
-                            <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
-                                <MapPin size={20} />
-                            </button>
-                        </div>
-                        {/* Map Mock */}
-                        <div className="h-32 bg-gray-800 rounded-xl border border-gray-700 flex items-center justify-center text-gray-500 text-xs">
-                            <MapPin className="mb-1" size={16} /> Map Integration Here
-                        </div>
+
+                        <LocationPicker onLocationSelect={handleLocationSelect} />
+
+                        <input
+                            type="text"
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
+                            placeholder="Location Name (e.g. Near Exit 3)"
+                            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 focus:border-neon-green focus:outline-none transition-colors text-sm"
+                        />
                     </div>
 
                     {/* Details: Max Participants, Level, Vibe */}

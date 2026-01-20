@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, MapPin, Calendar, Users, MessageCircle, Share2, MoreHorizontal, User, Send, Clock, Home } from 'lucide-react';
 import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
 import { createClient } from '@/lib/supabase/client';
+import MapView from '@/components/map-view';
 
 export default function MeetDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -74,6 +75,8 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                 startTime: new Date(data.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 endTime: data.end_time ? new Date(data.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
                 loc: data.location_name,
+                latitude: data.latitude,
+                longitude: data.longitude,
                 dist: '0.5km', // Mock for now
                 level: data.level,
                 vibe: data.vibe_tag,
@@ -333,10 +336,14 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="space-y-2">
                     <h3 className="font-bold text-lg">Location</h3>
                     <div className="aspect-video w-full bg-gray-800 rounded-2xl flex flex-col items-center justify-center border border-gray-700 relative overflow-hidden group">
-                        {/* Mock Map UI */}
-                        <div className="absolute inset-0 bg-gray-800 opacity-50"></div>
-                        <MapPin size={32} className="text-neon-green z-10 animate-bounce" />
-                        <span className="text-xs text-gray-400 mt-2 z-10">Google Maps Integration</span>
+                        {meetData.latitude && meetData.longitude ? (
+                            <MapView lat={meetData.latitude} lng={meetData.longitude} />
+                        ) : (
+                            <div className="flex flex-col items-center text-gray-500">
+                                <MapPin size={32} className="mb-2 opacity-50" />
+                                <span className="text-xs">No map location provided</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

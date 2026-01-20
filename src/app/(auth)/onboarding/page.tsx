@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Camera, MapPin, Check, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import LocationPicker from '@/components/location-picker';
 
 const SPORTS = [
     'Run', 'Cycle', 'Soccer', 'Basketball', 'Tennis',
@@ -19,6 +20,8 @@ export default function OnboardingPage() {
     const [nickname, setNickname] = useState('');
     const [bio, setBio] = useState('');
     const [location, setLocation] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
     const [skillLevels, setSkillLevels] = useState<Record<string, string>>({});
     const [vibe, setVibe] = useState('');
@@ -34,6 +37,12 @@ export default function OnboardingPage() {
             setAvatarFile(file);
             setAvatarPreview(URL.createObjectURL(file));
         }
+    };
+
+    const handleLocationSelect = (lat: number, lng: number, address?: string) => {
+        setLatitude(lat);
+        setLongitude(lng);
+        if (address) setLocation(address);
     };
 
     const handleNext = async () => {
@@ -84,6 +93,8 @@ export default function OnboardingPage() {
                 nickname,
                 bio,
                 location_name: location,
+                latitude,
+                longitude,
                 interests: selectedInterests,
                 skill_levels: finalSkills,
                 vibe,
@@ -188,7 +199,10 @@ export default function OnboardingPage() {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-400">Main Location</label>
-                                <div className="relative">
+
+                                <LocationPicker onLocationSelect={handleLocationSelect} />
+
+                                <div className="relative mt-2">
                                     <MapPin className="absolute top-4 left-4 text-gray-500" size={20} />
                                     <input
                                         type="text"
@@ -197,10 +211,6 @@ export default function OnboardingPage() {
                                         onChange={(e) => setLocation(e.target.value)}
                                         className="w-full bg-gray-900 border-gray-800 rounded-xl p-4 pl-12 text-white focus:border-neon-green focus:outline-none"
                                     />
-                                </div>
-                                {/* Mock Map Preview */}
-                                <div className="h-40 bg-gray-800/50 rounded-xl flex items-center justify-center text-gray-500 text-sm">
-                                    Map Preview (Google API)
                                 </div>
                             </div>
                         </div>
