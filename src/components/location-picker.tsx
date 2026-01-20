@@ -13,8 +13,7 @@ interface LocationPickerProps {
 }
 
 export default function LocationPicker({ onLocationSelect, initialLat, initialLng }: LocationPickerProps) {
-    // Fallback to hardcoded key to resolve Vercel Env issue immediately
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyAXu33JtcoiHzDB58Y9GTPCGY5M0aYAjgU';
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
     const { isLoaded, loadError } = useJsApiLoader({
         id: 'google-map-script',
