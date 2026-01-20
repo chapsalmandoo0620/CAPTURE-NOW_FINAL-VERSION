@@ -65,7 +65,9 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                         starPlayer: user.star_player_count || 0,
                         mannerPlayer: user.manner_player_count || 0
                     },
-                    meetingScore: (3.5 + ((user.star_player_count || 0) * 0.1)).toFixed(1)
+                    meetingScore: ((user.star_player_count || 0) > 0 || (user.manner_player_count || 0) > 0)
+                        ? Math.min(5.0, 3.5 + ((user.star_player_count || 0) * 0.1) + ((user.manner_player_count || 0) * 0.05)).toFixed(1)
+                        : '-'
                 });
 
                 // 3. Fetch Posts

@@ -14,7 +14,7 @@ export default function ProfilePage() {
     const [profilePosts, setProfilePosts] = useState<any[]>([]);
     const [selectedPost, setSelectedPost] = useState<any>(null);
 
-    const [meetingScore, setMeetingScore] = useState('0.0');
+    const [meetingScore, setMeetingScore] = useState('-'); // Default to '-' for no history
     const [followingCount, setFollowingCount] = useState(0);
     const [followersCount, setFollowersCount] = useState(0);
 
@@ -66,12 +66,12 @@ export default function ProfilePage() {
                     const star = profile.star_player_count || 0;
                     const manner = profile.manner_player_count || 0;
 
-                    let score = 0.0;
-                    // Only calculate score if they have received badges or (future) have history
                     if (star > 0 || manner > 0) {
-                        score = Math.min(5.0, 3.5 + (star * 0.1) + (manner * 0.05));
+                        const score = Math.min(5.0, 3.5 + (star * 0.1) + (manner * 0.05));
+                        setMeetingScore(score.toFixed(1));
+                    } else {
+                        setMeetingScore('-');
                     }
-                    setMeetingScore(score.toFixed(1));
                 }
 
                 // 2. Posts (My Moments)
@@ -116,7 +116,7 @@ export default function ProfilePage() {
                     setJoinedMeets(activeMeets.map((m: any) => ({
                         id: m.id,
                         title: m.title,
-                        date: new Date(m.start_time).toLocaleDateString(),
+                        date: m.start_time, // Use ISO string for reliable parsing
                         start_time: m.start_time,
                         loc: m.location_name || 'Unknown',
                         sport: m.category || 'Event'
@@ -128,16 +128,15 @@ export default function ProfilePage() {
         fetchData();
     }, []);
 
-    // Helper to format date string "2026-05-20 (Mon)" -> { month: 'MAY', day: '20' }
+    // Helper to format date string ISO -> { month: 'MAY', day: '20' }
     const formatDate = (dateStr: string) => {
         try {
-            // content "2026-05-20 (Mon)"
-            const datePart = dateStr.split(' ')[0]; // "2026-05-20"
-            const [year, month, day] = datePart.split('-');
-            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+            if (!dateStr) return { month: 'DATE', day: 'DD' };
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) throw new Error("Invalid Date");
             return {
                 month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
-                day: day
+                day: date.getDate().toString()
             };
         } catch (e) {
             return { month: 'DATE', day: 'DD' };
