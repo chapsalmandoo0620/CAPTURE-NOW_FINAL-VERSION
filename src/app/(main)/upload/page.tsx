@@ -70,7 +70,7 @@ export default function UploadPage() {
                 .from('highlights')
                 .upload(fileName, file);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) throw new Error(`Storage Upload Failed: ${uploadError.message}`);
 
             // 2. Get Public URL
             const { data: { publicUrl } } = supabase.storage
@@ -90,7 +90,7 @@ export default function UploadPage() {
                     longitude: longitude
                 });
 
-            if (dbError) throw dbError;
+            if (dbError) throw new Error(`Database Save Failed: ${dbError.message} (Details: ${dbError.details || 'Check RLS'})`);
 
             // Success
             router.push('/');
