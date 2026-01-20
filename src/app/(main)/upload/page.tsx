@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Image as ImageIcon, X, Send, Camera, MapPin } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import LocationPicker from '@/components/location-picker';
 
 export default function UploadPage() {
     const router = useRouter();
@@ -20,6 +21,8 @@ export default function UploadPage() {
     const [sport, setSport] = useState('');
     const [level, setLevel] = useState('');
     const [location, setLocation] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
 
     const SPORTS = [
         '',
@@ -41,6 +44,12 @@ export default function UploadPage() {
             };
             reader.readAsDataURL(selectedFile);
         }
+    };
+
+    const handleLocationSelect = (lat: number, lng: number, address?: string) => {
+        setLatitude(lat);
+        setLongitude(lng);
+        if (address) setLocation(address);
     };
 
     const handleUpload = async () => {
@@ -77,6 +86,8 @@ export default function UploadPage() {
                     caption: caption,
                     category: sport,
                     location_name: location,
+                    latitude: latitude,
+                    longitude: longitude
                 });
 
             if (dbError) throw dbError;
@@ -172,17 +183,21 @@ export default function UploadPage() {
                             </div>
 
                             {/* Location */}
-                            <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                    <MapPin size={18} />
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold ml-1 text-gray-400">Location</label>
+                                <LocationPicker onLocationSelect={handleLocationSelect} />
+                                <div className="relative">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                        <MapPin size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        value={location}
+                                        onChange={(e) => setLocation(e.target.value)}
+                                        placeholder="Add location name..."
+                                        className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm focus:border-neon-green focus:outline-none placeholder-gray-500 text-white"
+                                    />
                                 </div>
-                                <input
-                                    type="text"
-                                    value={location}
-                                    onChange={(e) => setLocation(e.target.value)}
-                                    placeholder="Add location..."
-                                    className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm focus:border-neon-green focus:outline-none placeholder-gray-500 text-white"
-                                />
                             </div>
 
                             {/* Caption Input */}

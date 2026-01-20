@@ -63,7 +63,14 @@ export default function ProfilePage() {
                     }));
 
                     // Calc Score heuristic
-                    const score = Math.min(5.0, 3.5 + ((profile.star_player_count || 0) * 0.1) + ((profile.manner_player_count || 0) * 0.05));
+                    const star = profile.star_player_count || 0;
+                    const manner = profile.manner_player_count || 0;
+
+                    let score = 0.0;
+                    // Only calculate score if they have received badges or (future) have history
+                    if (star > 0 || manner > 0) {
+                        score = Math.min(5.0, 3.5 + (star * 0.1) + (manner * 0.05));
+                    }
                     setMeetingScore(score.toFixed(1));
                 }
 
