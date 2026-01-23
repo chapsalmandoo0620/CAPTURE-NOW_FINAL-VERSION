@@ -33,31 +33,27 @@ export async function updateSession(request: NextRequest) {
 
     const path = request.nextUrl.pathname;
 
-    // 1. If user is NOT logged in
-    // 1. If user is NOT logged in
-    if (!user) {
-        // Protect private routes
-        // DISABLED for Mock Prototype: We use client-side localStorage check in layout.tsx
-        /*
-        if (path.startsWith('/onboarding') ||
-            path.startsWith('/meet') ||
-            path.startsWith('/upload') ||
-            path.startsWith('/profile')) {
-            return NextResponse.redirect(new URL('/login', request.url))
-        }
-        */
+    // 1. Define Public Paths (No Login Required)
+    const publicPaths = ['/login', '/signup', '/auth'];
+    const isPublic = publicPaths.some(p => path.startsWith(p));
+
+    // 2. Unauthenticated User Logic
+    if (!user && !isPublic) {
+        // Redirect to Login for any protected page (Home, Profile, Meet, Upload, etc.)
+        const url = request.nextUrl.clone();
+        url.pathname = '/login';
+        return NextResponse.redirect(url);
     }
 
-    // 2. If user IS logged in
-    // 2. If user IS logged in
-    /*
+    // 3. Authenticated User Logic
     if (user) {
-        // Redirect away from auth pages
+        // Redirect away from Login/Signup if already logged in
         if (path === '/login' || path === '/signup') {
-            return NextResponse.redirect(new URL('/', request.url))
+            const url = request.nextUrl.clone();
+            url.pathname = '/';
+            return NextResponse.redirect(url);
         }
     }
-    */
 
     return supabaseResponse
 }
