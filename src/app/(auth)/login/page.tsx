@@ -72,16 +72,21 @@ export default function LoginPage() {
         }
     };
 
-    const handleSocialMock = (provider: string) => {
-        // Mock Login Flow
-        alert(`Authenticating with ${provider}... (Mock)`);
-
-        // Simulating Auth Token
-        localStorage.setItem('capture_now_auth', 'true');
-
-        setTimeout(() => {
-            router.push('/');
-        }, 500);
+    const handleSocialLogin = async (provider: 'google' | 'kakao') => {
+        setLoading(true);
+        const supabase = createClient();
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`,
+                },
+            });
+            if (error) throw error;
+        } catch (error: any) {
+            alert(error.message);
+            setLoading(false);
+        }
     };
 
     return (
@@ -154,15 +159,12 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
-                        <button onClick={() => handleSocialMock('Google')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
-                            <span className="text-sm font-bold">G</span>
+                    <div className="grid grid-cols-2 gap-3">
+                        <button onClick={() => handleSocialLogin('google')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
+                            <span className="text-sm font-bold">Google</span>
                         </button>
-                        <button onClick={() => handleSocialMock('Kakao')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-[#FEE500] hover:text-black hover:border-[#FEE500] transition-colors">
-                            <span className="text-sm font-bold">K</span>
-                        </button>
-                        <button onClick={() => handleSocialMock('Apple')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-white hover:text-black hover:border-white transition-colors">
-                            <span className="text-sm font-bold">A</span>
+                        <button onClick={() => handleSocialLogin('kakao')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-[#FEE500] hover:text-black hover:border-[#FEE500] transition-colors">
+                            <span className="text-sm font-bold">Kakao</span>
                         </button>
                     </div>
                 </div>
