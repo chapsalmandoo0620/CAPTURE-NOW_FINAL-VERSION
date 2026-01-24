@@ -22,17 +22,28 @@ export default function MainLayout({
     const pathname = usePathname();
     const router = useRouter();
 
-    // Mock Auth Guard - DISABLED due to potential navigation loops/hangs
-    // useEffect(() => {
-    //     const checkAuth = () => {
-    //         const isAuthenticated = localStorage.getItem('capture_now_auth');
-    //         if (!isAuthenticated) {
-    //             // If not authenticated, redirect to Login
-    //             router.replace('/login');
-    //         }
-    //     };
-    //     checkAuth();
-    // }, [pathname, router]);
+    // Check for profile existence immediately on mount
+    useEffect(() => {
+        const checkProfile = async () => {
+            // We only check if we are NOT already on onboarding (though layout doesn't wrap it, good to be safe)
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('id')
+                    .eq('id', user.id)
+                    .single();
+
+                // If no public profile exists, this is a new OAuth user -> Onboarding
+                if (!profile) {
+                    router.replace('/onboarding');
+                }
+            }
+        };
+        checkProfile();
+    }, [pathname, router]);
 
     return (
         <div className="flex justify-center min-h-screen bg-black">
