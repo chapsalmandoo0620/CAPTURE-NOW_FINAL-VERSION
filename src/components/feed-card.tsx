@@ -1,36 +1,126 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, MessageSquare, Send, MoreHorizontal, Edit, Trash2, X } from 'lucide-react';
+import { Heart, MessageSquare, Send, MoreHorizontal, Edit, Trash2, X, Check } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface Post {
-    id: number;
+    id: string; // UUID
     user: string;
     userImg: string;
     image: string;
-    type?: 'image' | 'video'; // New
+    type?: 'image' | 'video';
     likes: number;
     caption: string;
     location: string;
     time: string;
-    height: string;
-    comments: { user: string; text: string }[];
-    sport?: string; // New
-    level?: string; // New
+    height?: string;
+    comments?: { user: string; text: string }[];
+    sport?: string;
+    level?: string;
 }
 
-export default function FeedCard({ post, isModal = false, onUserClick }: { post: Post; isModal?: boolean; onUserClick?: () => void }) {
+export default function FeedCard({ post, isModal = false, onUserClick, currentUser, onDelete }: {
+    post: Post;
+    isModal?: boolean;
+    onUserClick?: () => void;
+    currentUser?: any;
+    onDelete?: (id: string) => void;
+}) {
+    const supabase = createClient();
     const [liked, setLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likes || 0);
     const [showComments, setShowComments] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
     const [commentText, setCommentText] = useState('');
-    const [comments, setComments] = useState(post.comments || []);
+    const [comments, setComments] = useState<{ id: number, user: string, text: string }[]>([]);
 
-    const toggleLike = () => {
+    // Edit Mode
+    const [isEditing, setIsEditing] = useState(false);
+    const [editCaption, setEditCaption] = useState(post.caption);
+
+    // 1. Fetch Interaction Data (Likes & Comments)
+    useEffect(() => {
+        const fetchInteractions = async () => {
+            // Check if Liked
+            if (currentUser) {
+                const { data: likeData } = await supabase
+                    .from('post_likes')
+                    .select('*')
+                    .match({ user_id: currentUser.id, post_id: post.id })
+                    .single();
+                if (likeData) setLiked(true);
+            }
+
+            // Get Real Like Count
+            const { count } = await supabase
+                .from('post_likes')
+                .select('*', { count: 'exact', head: true })
+                .eq('post_id', post.id);
+            if (count !== null) setLikeCount(count);
+
+            // Get Comments
+            const { data: commentsData } = await supabase
+                .from('post_comments')
+                .select('id, text, user:users(nickname)')
+                .eq('post_id', post.id)
+                .order('created_at', { ascending: true });
+
+            if (commentsData) {
+                setComments(commentsData.map(c => ({
+                    id: c.id,
+                    user: (c.user as any)?.nickname || 'Unknown',
+                    text: c.text
+                })));
+            }
+        };
+        fetchInteractions();
+    }, [post.id, currentUser]);
+
+    const toggleLike = async () => {
+        if (!currentUser) return alert('Please login to like.');
+
+        const originalLiked = liked;
+        const originalCount = likeCount;
+
+        // Optimistic Update
         setLiked(!liked);
-        setLikeCount(prev => liked ? prev - 1 : prev + 1);
+        setLikeCount(prev => !liked ? prev + 1 : prev - 1);
+
+        if (!originalLiked) {
+            // Add Like
+            const { error } = await supabase.from('post_likes').insert({ user_id: currentUser.id, post_id: post.id });
+            if (error) {
+                setLiked(originalLiked);
+                setLikeCount(originalCount);
+            }
+        } else {
+            // Remove Like
+            const { error } = await supabase.from('post_likes').delete().match({ user_id: currentUser.id, post_id: post.id });
+            if (error) {
+                setLiked(originalLiked);
+                setLikeCount(originalCount);
+            }
+        }
+    };
+
+    const handleAddComment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!commentText.trim() || !currentUser) return;
+
+        const newTempComment = { id: Date.now(), user: currentUser.user_metadata?.nickname || 'Me', text: commentText };
+        setComments([...comments, newTempComment]);
+        setCommentText('');
+
+        const { error } = await supabase.from('post_comments').insert({
+            user_id: currentUser.id,
+            post_id: post.id,
+            text: newTempComment.text
+        });
+
+        if (error) {
+            alert('Failed to post comment.');
+            setComments(prev => prev.filter(c => c.id !== newTempComment.id));
+        }
     };
 
     const handleShare = () => {
@@ -38,12 +128,31 @@ export default function FeedCard({ post, isModal = false, onUserClick }: { post:
         alert('Link copied to clipboard!');
     };
 
-    const handleAddComment = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!commentText.trim()) return;
-        setComments([...comments, { user: 'me', text: commentText }]);
-        setCommentText('');
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this post?')) return;
+
+        const { error } = await supabase.from('highlights').delete().eq('id', post.id);
+        if (error) {
+            alert('Failed to delete post.');
+        } else {
+            onDelete?.(post.id);
+            if (isModal) onUserClick?.(); // Close modal if delete
+        }
     };
+
+    const handleEdit = async () => {
+        if (!editCaption.trim()) return;
+
+        const { error } = await supabase.from('highlights').update({ caption: editCaption }).eq('id', post.id);
+        if (error) {
+            alert('Failed to update post.');
+        } else {
+            setIsEditing(false);
+            post.caption = editCaption; // Update local prop ref visually (optional)
+        }
+    };
+
+    const isOwner = currentUser && post.user === currentUser.user_metadata?.nickname;
 
     return (
         <article className={`relative bg-black ${isModal ? 'rounded-2xl overflow-hidden' : 'border-t border-gray-900 pt-4'}`}>
@@ -71,18 +180,26 @@ export default function FeedCard({ post, isModal = false, onUserClick }: { post:
                 </Link>
 
                 <div className="relative">
-                    <button onClick={() => setShowOptions(!showOptions)} className="text-gray-500 hover:text-white p-1">
-                        <MoreHorizontal size={20} />
-                    </button>
+                    {isOwner && (
+                        <button onClick={() => setShowOptions(!showOptions)} className="text-gray-500 hover:text-white p-1">
+                            <MoreHorizontal size={20} />
+                        </button>
+                    )}
 
                     {showOptions && (
                         <>
                             <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)}></div>
                             <div className="absolute right-0 top-full mt-1 w-32 bg-gray-900 border border-gray-800 rounded-xl shadow-xl z-20 overflow-hidden">
-                                <button className="w-full px-4 py-3 text-left text-xs font-medium text-white hover:bg-gray-800 flex items-center gap-2">
+                                <button
+                                    onClick={() => { setIsEditing(true); setShowOptions(false); }}
+                                    className="w-full px-4 py-3 text-left text-xs font-medium text-white hover:bg-gray-800 flex items-center gap-2"
+                                >
                                     <Edit size={14} /> Edit
                                 </button>
-                                <button className="w-full px-4 py-3 text-left text-xs font-medium text-red-500 hover:bg-gray-800 flex items-center gap-2">
+                                <button
+                                    onClick={handleDelete}
+                                    className="w-full px-4 py-3 text-left text-xs font-medium text-red-500 hover:bg-gray-800 flex items-center gap-2"
+                                >
                                     <Trash2 size={14} /> Delete
                                 </button>
                             </div>
@@ -91,8 +208,8 @@ export default function FeedCard({ post, isModal = false, onUserClick }: { post:
                 </div>
             </div>
 
-            {/* Post Content (Video or Image) */}
-            <div className={`w-full ${post.height} bg-gray-900 relative group overflow-hidden`}>
+            {/* Post Content */}
+            <div className={`w-full ${post.height || 'aspect-square'} bg-gray-900 relative group overflow-hidden`}>
                 {post.type === 'video' ? (
                     <video
                         src={post.image}
@@ -104,8 +221,6 @@ export default function FeedCard({ post, isModal = false, onUserClick }: { post:
                 ) : (
                     <img src={post.image} alt="Post" className="w-full h-full object-cover" />
                 )}
-
-                {/* Gradient Overlay for Image Only */}
                 {!isModal && post.type !== 'video' && (
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
                 )}
@@ -129,14 +244,27 @@ export default function FeedCard({ post, isModal = false, onUserClick }: { post:
 
                 <div className="font-bold text-sm px-1">{likeCount.toLocaleString()} likes</div>
 
-                <div className="px-1 text-sm leading-relaxed text-gray-200">
-                    <span className="font-bold mr-2 text-white">{post.user}</span>
-                    {post.caption}
-                </div>
+                {isEditing ? (
+                    <div className="flex gap-2 items-center px-1">
+                        <input
+                            type="text"
+                            className="bg-gray-800 border border-gray-700 rounded text-sm w-full px-2 py-1 text-white focus:outline-none focus:border-neon-green"
+                            value={editCaption}
+                            onChange={(e) => setEditCaption(e.target.value)}
+                            autoFocus
+                        />
+                        <button onClick={handleEdit} className="text-neon-green"><Check size={18} /></button>
+                        <button onClick={() => setIsEditing(false)} className="text-red-500"><X size={18} /></button>
+                    </div>
+                ) : (
+                    <div className="px-1 text-sm leading-relaxed text-gray-200">
+                        <span className="font-bold mr-2 text-white">{post.user}</span>
+                        {editCaption}
+                    </div>
+                )}
 
                 <div className="px-1 text-[10px] text-gray-500 uppercase tracking-wide">{post.time} AGO</div>
 
-                {/* Comments Section */}
                 {(showComments || isModal) && (
                     <div className={`mt-4 bg-gray-900/50 rounded-xl p-3 space-y-3 ${!isModal && 'animate-in fade-in slide-in-from-top-2'}`}>
                         <div className="flex justify-between items-center border-b border-gray-800 pb-2">

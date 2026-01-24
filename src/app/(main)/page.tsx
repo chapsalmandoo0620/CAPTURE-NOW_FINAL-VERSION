@@ -40,6 +40,7 @@ export default function HomePage() {
     const [liveMeet, setLiveMeet] = useState<any>(null);
     const [isLiveJoined, setIsLiveJoined] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,13 +70,14 @@ export default function HomePage() {
                     level: 'Any',
                     time: new Date(post.created_at).toLocaleDateString(),
                     timestamp: new Date(post.created_at).getTime(),
-                    comments: []
                 }));
                 setPosts(formattedPosts);
             }
 
             // 1.5 Get User Location for Distance Calc
             const { data: { user } } = await supabase.auth.getUser();
+            if (user) setCurrentUser(user);
+
             let userLat = 0;
             let userLng = 0;
             if (user) {
@@ -154,6 +156,10 @@ export default function HomePage() {
                 .insert({ meetup_id: liveMeet.id, user_id: user.id });
             if (!error) setIsLiveJoined(true);
         }
+    };
+
+    const handlePostDelete = (postId: string) => {
+        setPosts(prev => prev.filter(p => p.id !== postId));
     };
 
     return (
@@ -244,7 +250,7 @@ export default function HomePage() {
             {/* Feed */}
             <section className="pb-24 space-y-6">
                 {posts.length > 0 ? (
-                    posts.map(post => <FeedCard key={post.id} post={post} />)
+                    posts.map(post => <FeedCard key={post.id} post={post} currentUser={currentUser} onDelete={handlePostDelete} />)
                 ) : (
                     <div className="px-4 py-12 text-center flex flex-col items-center">
                         <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mb-4">

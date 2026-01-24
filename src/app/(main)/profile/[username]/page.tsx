@@ -17,12 +17,15 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
     const [userPosts, setUserPosts] = useState<any[]>([]);
     const [selectedPost, setSelectedPost] = useState<any>(null);
     const [isFollowing, setIsFollowing] = useState(false);
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     // Check Redirect
     useEffect(() => {
         const checkMe = async () => {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
+            setCurrentUser(user);
+
             if (user) {
                 const { data: profile } = await supabase.from('users').select('nickname').eq('id', user.id).single();
                 if (profile && profile.nickname === decodedUsername) {
@@ -116,6 +119,11 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
         localStorage.setItem('my_following', JSON.stringify(newList));
         setIsFollowing(!isFollowing);
         window.dispatchEvent(new Event('storage'));
+    };
+
+    const handlePostDelete = (postId: string) => {
+        setUserPosts(prev => prev.filter(p => p.id !== postId));
+        if (selectedPost?.id === postId) setSelectedPost(null);
     };
 
     if (loading) return <div className="min-h-screen bg-black text-white p-6 flex items-center justify-center">Loading...</div>;
@@ -263,6 +271,8 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                             post={selectedPost}
                             isModal={true}
                             onUserClick={() => setSelectedPost(null)}
+                            currentUser={currentUser}
+                            onDelete={handlePostDelete}
                         />
                     </div>
                 </div>
