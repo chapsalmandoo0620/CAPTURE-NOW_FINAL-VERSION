@@ -48,8 +48,8 @@ export default function EditProfilePage() {
                     setLongitude(profile.longitude);
                     setVibe(profile.vibe || 'Fun');
                     setPreviewUrl(profile.avatar_url || '');
-                    setSelectedInterests(profile.interests || []);
-                    setSkillLevels(profile.skill_levels || {});
+                    setSelectedInterests((profile.interests as string[]) || []);
+                    setSkillLevels((profile.skill_levels as Record<string, string>) || {});
                 }
             } else {
                 router.replace('/login');
