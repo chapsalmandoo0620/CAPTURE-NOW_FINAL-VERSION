@@ -66,6 +66,33 @@ export default function EditProfilePage() {
 
     // ... handleFileChange, toggleInterest ...
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const toggleInterest = (sport: string) => {
+        setSelectedInterests(prev => {
+            if (prev.includes(sport)) {
+                return prev.filter(s => s !== sport);
+            } else {
+                return [...prev, sport];
+            }
+        });
+
+        if (!skillLevels[sport]) {
+            setSkillLevels(prev => ({ ...prev, [sport]: 'Beginner' }));
+        }
+    };
+
+    const setSkill = (sport: string, level: string) => {
+        setSkillLevels(prev => ({ ...prev, [sport]: level }));
+    };
+
+
     const handleSave = async () => {
         if (!user) return;
         setLoading(true);
