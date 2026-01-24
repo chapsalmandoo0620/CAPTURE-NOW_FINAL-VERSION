@@ -159,7 +159,7 @@ return (
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Main Location</label>
+                    <label className="text-sm font-medium text-gray-400">Main Location <span className="text-neon-green text-xs">(Map Selection Required)</span></label>
                     {/* Render LocationPicker conditionally if keys loaded to prevent map flicker, or just render */}
                     <LocationPicker onLocationSelect={handleLocationSelect} initialLat={latitude || undefined} initialLng={longitude || undefined} />
                     <div className="relative mt-2">
