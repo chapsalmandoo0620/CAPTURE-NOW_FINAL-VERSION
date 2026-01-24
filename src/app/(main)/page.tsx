@@ -14,10 +14,24 @@ function getEmoji(sport: string) {
     if (s.includes('tennis')) return '🎾';
     if (s.includes('cycle') || s.includes('bik')) return '🚴';
     if (s.includes('hik') || s.includes('moun')) return '⛰️';
-    if (s.includes('swim')) return '�';
+    if (s.includes('swim')) return '';
     if (s.includes('golf')) return '⛳';
     if (s.includes('basket')) return '🏀';
     return '⚡';
+}
+
+// Helper: Haversine Distance
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 'Unknown';
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
 }
 
 export default function HomePage() {
@@ -60,6 +74,18 @@ export default function HomePage() {
                 setPosts(formattedPosts);
             }
 
+            // 1.5 Get User Location for Distance Calc
+            const { data: { user } } = await supabase.auth.getUser();
+            let userLat = 0;
+            let userLng = 0;
+            if (user) {
+                const { data: profile } = await supabase.from('users').select('latitude, longitude').eq('id', user.id).single();
+                if (profile) {
+                    userLat = profile.latitude;
+                    userLng = profile.longitude;
+                }
+            }
+
             // 2. Fetch Meetups (Live & Quick)
             const { data: meetsData } = await supabase
                 .from('meetups')
@@ -73,17 +99,19 @@ export default function HomePage() {
                 setLiveMeet(meetsData[0]);
 
                 // Rest are Quick Meets
-                setQuickMeets(meetsData.slice(1).map(m => ({
-                    id: m.id,
-                    sport: m.category,
-                    emoji: getEmoji(m.category || ''),
-                    time: new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    loc: m.location_name?.split(' ')[0] || 'Loc',
-                    dist: '0.8km' // Mock
-                })));
+                setQuickMeets(meetsData.slice(1).map(m => {
+                    const dist = calculateDistance(userLat, userLng, m.latitude, m.longitude);
+                    return {
+                        id: m.id,
+                        sport: m.category,
+                        emoji: getEmoji(m.category || ''),
+                        time: new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        loc: m.location_name?.split(' ')[0] || 'Loc',
+                        dist: dist
+                    };
+                }));
 
                 // Check Join Status for Live Meet
-                const { data: { user } } = await supabase.auth.getUser();
                 if (user && meetsData[0]) {
                     const { data: participant } = await supabase
                         .from('meetup_participants')
@@ -95,7 +123,6 @@ export default function HomePage() {
             }
             setLoading(false);
         };
-
         fetchData();
     }, []);
 
