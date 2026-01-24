@@ -83,6 +83,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                 if (posts) {
                     setUserPosts(posts.map(p => ({
                         id: p.id,
+                        userId: user.id,
                         user: user.nickname,
                         userImg: user.avatar_url,
                         image: p.media_url,

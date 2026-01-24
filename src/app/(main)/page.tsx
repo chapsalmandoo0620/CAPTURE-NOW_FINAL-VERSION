@@ -59,6 +59,7 @@ export default function HomePage() {
             if (postsData) {
                 const formattedPosts = postsData.map(post => ({
                     id: post.id,
+                    userId: post.user_id,
                     user: post.user?.nickname || 'Unknown',
                     userImg: post.user?.avatar_url || '',
                     image: post.media_url,
