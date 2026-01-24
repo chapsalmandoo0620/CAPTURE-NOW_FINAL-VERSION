@@ -4,10 +4,24 @@ import { useState, useEffect } from 'react';
 import { Search, Map as MapIcon, List, Filter, Calendar, MapPin, Plus, X, ChevronDown, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-const CATEGORIES = ['All', 'Running', 'Soccer', 'Tennis', 'Cycling', 'Hiking', 'Golf', 'Basketball'];
+const CATEGORIES = ['All', 'Running', 'Cycle', 'Soccer', 'Basketball', 'Tennis', 'Golf', 'Climbing', 'Fitness', 'Yoga', 'Swimming', 'Hiking', 'Skating', 'Surfing', 'Badminton', 'Boxing', 'MMA', 'Crossfit'];
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Any'];
 const VIBES = ['Competitive', 'Fun', 'Training'];
 const DISTANCES = ['< 1km', '1-3km', '3-5km', '5-10km', '10km+'];
+
+// Haversine Formula for Distance
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return 'Unknown';
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
+}
 
 export default function MeetPage() {
     // UI State
@@ -33,10 +47,26 @@ export default function MeetPage() {
         const loadMeets = async () => {
             const supabase = createClient();
 
-            // 1. Get Current User for "Joined" check
+            // 1. Get Current User & Profile Location
             const { data: { user } } = await supabase.auth.getUser();
+            let userLat = 0;
+            let userLng = 0;
+            let myId = '';
+            let currentJoined: string[] = [];
+
             if (user) {
-                setMyProfile({ id: user.id }); // Minimal profile for ID check
+                myId = user.id;
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('nickname, latitude, longitude')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile) {
+                    setMyProfile({ id: user.id, nickname: profile.nickname });
+                    userLat = profile.latitude;
+                    userLng = profile.longitude;
+                }
 
                 // Fetch joined meetups
                 const { data: joinedData } = await supabase
@@ -45,7 +75,8 @@ export default function MeetPage() {
                     .eq('user_id', user.id);
 
                 if (joinedData) {
-                    setJoinedMeets(joinedData.map(j => j.meetup_id));
+                    currentJoined = joinedData.map(j => j.meetup_id);
+                    setJoinedMeets(currentJoined);
                 }
             }
 
@@ -57,27 +88,49 @@ export default function MeetPage() {
                     host:users!host_id(nickname),
                     participants:meetup_participants(user_id)
                 `)
-                .neq('status', 'finished')
-                .order('start_time', { ascending: true });
+                .neq('status', 'finished');
 
             if (data) {
-                const formatted = data.map(m => ({
-                    id: m.id,
-                    title: m.title,
-                    host: m.host?.nickname || 'Unknown',
-                    hostId: m.host_id,
-                    sport: m.category || 'Other',
-                    date: new Date(m.start_time).toISOString().split('T')[0],
-                    startTime: new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    endTime: m.end_time ? new Date(m.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
-                    loc: m.location_name,
-                    dist: '1.2km', // Mock: PostGIS calc needed for real dist
-                    level: m.level,
-                    vibe: m.vibe_tag,
-                    max: m.max_participants,
-                    participants: m.participants.length,
-                    status: m.status
-                }));
+                const formatted = data.map(m => {
+                    const dist = calculateDistance(userLat, userLng, m.latitude, m.longitude);
+                    return {
+                        id: m.id,
+                        title: m.title,
+                        host: m.host?.nickname || 'Unknown',
+                        hostId: m.host_id,
+                        sport: m.category || 'Other',
+                        date: new Date(m.start_time).toISOString().split('T')[0],
+                        startTime: new Date(m.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        endTime: m.end_time ? new Date(m.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+                        loc: m.location_name,
+                        latitude: m.latitude,
+                        longitude: m.longitude,
+                        dist: dist, // Real Distance
+                        level: m.level,
+                        vibe: m.vibe_tag,
+                        max: m.max_participants,
+                        participants: m.participants.length,
+                        status: m.status,
+                        start_time: m.start_time // Keep for sorting
+                    };
+                });
+
+                // Sorting Logic
+                // Priority: Hosted by Me -> Joined by Me -> Start Time Ascending
+                formatted.sort((a, b) => {
+                    const aHosted = a.hostId === myId;
+                    const bHosted = b.hostId === myId;
+                    if (aHosted && !bHosted) return -1;
+                    if (!aHosted && bHosted) return 1;
+
+                    const aJoined = currentJoined.includes(a.id);
+                    const bJoined = currentJoined.includes(b.id);
+                    if (aJoined && !bJoined) return -1;
+                    if (!aJoined && bJoined) return 1;
+
+                    return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+                });
+
                 setMeets(formatted);
             }
         };
@@ -86,6 +139,7 @@ export default function MeetPage() {
 
     // Filter & Search Logic
     const filteredMeets = meets.filter(meet => {
+
         const matchesSearch = searchQuery === '' ||
             meet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             meet.host.toLowerCase().includes(searchQuery.toLowerCase()) ||
