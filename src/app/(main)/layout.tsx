@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, Search, Plus, User, Menu, Aperture } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 import { useEffect } from 'react';
 
 const NAV_ITEMS = [
