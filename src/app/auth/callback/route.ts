@@ -9,20 +9,17 @@ export async function GET(request: Request) {
     const next = searchParams.get('next') ?? '/'
 
     if (code) {
+        const cookieStore: any[] = [];
         const supabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
             {
                 cookies: {
                     getAll() {
-                        // @ts-ignore
                         return request.cookies.getAll()
                     },
                     setAll(cookiesToSet) {
-                        // Middleware will handle session refresh, but here we exchange code
-                        // We can't set cookies on request, but we need to on response
-                        // This dance is handled by @supabase/ssr usually 
-                        // but in Route Handler we need to prepare response
+                        cookiesToSet.forEach((cookie) => cookieStore.push(cookie));
                     },
                 },
             }
@@ -36,13 +33,19 @@ export async function GET(request: Request) {
             const forwardedHost = request.headers.get('x-forwarded-host')
             const isLocal = origin.includes('localhost')
 
-            if (isLocal) {
-                return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
-            } else {
-                return NextResponse.redirect(`${origin}${next}`)
+            let redirectUrl = `${origin}${next}`
+            if (forwardedHost && !isLocal) {
+                redirectUrl = `https://${forwardedHost}${next}`
             }
+
+            const response = NextResponse.redirect(redirectUrl)
+
+            // Apply captured cookies to the response
+            cookieStore.forEach((cookie) => {
+                response.cookies.set(cookie.name, cookie.value, cookie.options)
+            })
+
+            return response
         }
     }
 
