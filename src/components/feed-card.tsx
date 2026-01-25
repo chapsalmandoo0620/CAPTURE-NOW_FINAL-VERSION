@@ -159,54 +159,58 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
         <article className={`relative bg-black ${isModal ? 'rounded-2xl overflow-hidden' : 'border-t border-gray-900 pt-4'}`}>
             {/* Post Header */}
             <div className="px-4 pb-3 pt-3 flex items-center justify-between">
-                <Link
-                    href={`/profile/${post.user}`}
-                    className="flex items-center gap-3 group"
-                    onClick={() => onUserClick?.()}
-                >
-                    <div className="w-9 h-9 rounded-full bg-gray-800 overflow-hidden border border-gray-700 group-hover:border-neon-green transition-colors">
-                        <img src={post.userImg} alt={post.user} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm leading-none mb-1 group-hover:text-neon-green transition-colors">{post.user}</span>
-                            {post.sport && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700 mb-1">
-                                    {post.sport} <span className="text-neon-green">{post.level}</span>
-                                </span>
-                            )}
+                <div className="flex items-center gap-2">
+                    <Link
+                        href={`/profile/${post.user}`}
+                        className="flex items-center gap-3 group"
+                        onClick={() => onUserClick?.()}
+                    >
+                        <div className="w-9 h-9 rounded-full bg-gray-800 overflow-hidden border border-gray-700 group-hover:border-neon-green transition-colors">
+                            <img src={post.userImg} alt={post.user} className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-[10px] text-gray-500">{post.location}</span>
-                    </div>
-                </Link>
-
-                <div className="relative">
-                    {isOwner && (
-                        <button onClick={() => setShowOptions(!showOptions)} className="text-gray-500 hover:text-white p-1">
-                            <MoreHorizontal size={20} />
-                        </button>
-                    )}
-
-                    {showOptions && (
-                        <>
-                            <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)}></div>
-                            <div className="absolute right-0 top-full mt-1 w-32 bg-gray-900 border border-gray-800 rounded-xl shadow-xl z-20 overflow-hidden">
-                                <button
-                                    onClick={() => { setIsEditing(true); setShowOptions(false); }}
-                                    className="w-full px-4 py-3 text-left text-xs font-medium text-white hover:bg-gray-800 flex items-center gap-2"
-                                >
-                                    <Edit size={14} /> Edit
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="w-full px-4 py-3 text-left text-xs font-medium text-red-500 hover:bg-gray-800 flex items-center gap-2"
-                                >
-                                    <Trash2 size={14} /> Delete
-                                </button>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm leading-none mb-1 group-hover:text-neon-green transition-colors">{post.user}</span>
+                                {post.sport && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700 mb-1">
+                                        {post.sport} <span className="text-neon-green">{post.level}</span>
+                                    </span>
+                                )}
                             </div>
-                        </>
-                    )}
+                            <span className="text-[10px] text-gray-500">{post.location}</span>
+                        </div>
+                    </Link>
+
+                    <div className="relative">
+                        {isOwner && (
+                            <button onClick={() => setShowOptions(!showOptions)} className="text-gray-500 hover:text-white p-1 ml-1">
+                                <MoreHorizontal size={20} />
+                            </button>
+                        )}
+
+                        {showOptions && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setShowOptions(false)}></div>
+                                <div className="absolute left-0 top-full mt-1 w-32 bg-gray-900 border border-gray-800 rounded-xl shadow-xl z-20 overflow-hidden">
+                                    <button
+                                        onClick={() => { setIsEditing(true); setShowOptions(false); }}
+                                        className="w-full px-4 py-3 text-left text-xs font-medium text-white hover:bg-gray-800 flex items-center gap-2"
+                                    >
+                                        <Edit size={14} /> Edit
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="w-full px-4 py-3 text-left text-xs font-medium text-red-500 hover:bg-gray-800 flex items-center gap-2"
+                                    >
+                                        <Trash2 size={14} /> Delete
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
+
+                <div className="w-8"></div> {/* Placeholder to keep spatial balance if not in modal, or room for modal X */}
             </div>
 
             {/* Post Content */}
