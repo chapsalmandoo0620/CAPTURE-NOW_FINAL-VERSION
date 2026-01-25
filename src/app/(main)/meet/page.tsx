@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Map as MapIcon, List, Filter, Calendar, MapPin, Plus, X, ChevronDown, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
 
 const CATEGORIES = ['All', 'Running', 'Cycle', 'Soccer', 'Basketball', 'Tennis', 'Golf', 'Climbing', 'Fitness', 'Yoga', 'Swimming', 'Hiking', 'Skating', 'Surfing', 'Badminton', 'Boxing', 'MMA', 'Crossfit'];
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Any'];
@@ -42,6 +43,119 @@ export default function MeetPage() {
 
     // Initialize & Load Persistence
     const [joinedMeets, setJoinedMeets] = useState<string[]>([]);
+
+    // Auto-Feedback State
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [pendingFeedbackMeet, setPendingFeedbackMeet] = useState<any>(null);
+
+    // Check for Pending Feedback
+    useEffect(() => {
+        const checkPendingFeedback = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // 1. Get my finished meetups
+            const { data: participations } = await supabase
+                .from('meetup_participants')
+                .select(`
+                    meetup_id,
+                    meetup:meetups (
+                        id, title, status, host_id,
+                        participants:meetup_participants(
+                            user:users(id, nickname, avatar_url)
+                        )
+                    )
+                `)
+                .eq('user_id', user.id);
+
+            if (!participations) return;
+
+            // Filter for 'finished' meetups
+            const finishedMeets = participations
+                .map((p: any) => p.meetup)
+                .filter((m: any) => m && m.status === 'finished');
+
+            if (finishedMeets.length === 0) return;
+
+            // 2. Get my submitted feedbacks
+            const { data: myFeedbacks } = await supabase
+                .from('meetup_feedback')
+                .select('meetup_id')
+                .eq('reviewer_id', user.id);
+
+            const reviewedIds = new Set(myFeedbacks?.map(f => f.meetup_id) || []);
+
+            // 3. Find first unreviewed
+            const pending = finishedMeets.find((m: any) => !reviewedIds.has(m.id));
+
+            if (pending) {
+                // Format participants for modal
+                const modalParticipants = pending.participants.map((p: any) => ({
+                    id: p.user.id,
+                    name: p.user.nickname,
+                    avatar: p.user.avatar_url
+                }));
+
+                setPendingFeedbackMeet({
+                    id: pending.id,
+                    title: pending.title,
+                    participants: modalParticipants
+                });
+                setShowFeedbackModal(true);
+            }
+        };
+
+        checkPendingFeedback();
+    }, []);
+
+    const handleFeedbackSubmit = async (rating: number, starName: string | null, mannerName: string | null) => {
+        if (!pendingFeedbackMeet) return;
+
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Resolve Names (Logic copied from meet/[id]/page.tsx)
+        let starId = null;
+        let mannerId = null;
+
+        if (starName) {
+            const target = pendingFeedbackMeet.participants.find((p: any) => p.name === starName);
+            if (target) starId = target.id;
+        }
+        if (mannerName) {
+            const target = pendingFeedbackMeet.participants.find((p: any) => p.name === mannerName);
+            if (target) mannerId = target.id;
+        }
+
+        const { error } = await supabase.from('meetup_feedback').insert({
+            meetup_id: pendingFeedbackMeet.id,
+            reviewer_id: user.id,
+            rating,
+            star_player_id: starId,
+            manner_player_id: mannerId
+        });
+
+        if (error) {
+            alert(`Failed to submit feedback: ${error.message}`);
+            return;
+        }
+
+        // Badge Updates
+        if (starId) {
+            const { data: sUser } = await supabase.from('users').select('star_player_count').eq('id', starId).single();
+            if (sUser) await supabase.from('users').update({ star_player_count: (sUser.star_player_count || 0) + 1 }).eq('id', starId);
+        }
+        if (mannerId) {
+            const { data: mUser } = await supabase.from('users').select('manner_player_count').eq('id', mannerId).single();
+            if (mUser) await supabase.from('users').update({ manner_player_count: (mUser.manner_player_count || 0) + 1 }).eq('id', mannerId);
+        }
+
+        alert('Feedback submitted!');
+        setShowFeedbackModal(false);
+        setPendingFeedbackMeet(null);
+    };
 
     useEffect(() => {
         const loadMeets = async () => {
@@ -448,6 +562,17 @@ export default function MeetPage() {
                     <Plus size={32} strokeWidth={2.5} />
                 </div>
             </a>
+
+            {/* Auto Feedback Modal */}
+            {pendingFeedbackMeet && (
+                <MeetupFeedbackModal
+                    isOpen={showFeedbackModal}
+                    onClose={() => setShowFeedbackModal(false)}
+                    meetupTitle={pendingFeedbackMeet.title}
+                    participants={pendingFeedbackMeet.participants}
+                    onSubmit={handleFeedbackSubmit}
+                />
+            )}
         </div>
     );
 }

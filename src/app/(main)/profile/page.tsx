@@ -65,13 +65,18 @@ export default function ProfilePage() {
                         }
                     }));
 
-                    // Calc Score heuristic
-                    const star = profile.star_player_count || 0;
-                    const manner = profile.manner_player_count || 0;
+                    // Calc Pure Average Score
+                    // We need to fetch ratings for meetups HOSTED by this user
+                    // Supabase join: meetup_feedback -> meetup (host_id)
+                    const { data: feedbackData } = await supabase
+                        .from('meetup_feedback')
+                        .select('rating, meetup:meetups!inner(host_id)')
+                        .eq('meetup.host_id', authUser.id);
 
-                    if (star > 0 || manner > 0) {
-                        const score = Math.min(5.0, 3.5 + (star * 0.1) + (manner * 0.05));
-                        setMeetingScore(score.toFixed(1));
+                    if (feedbackData && feedbackData.length > 0) {
+                        const total = feedbackData.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+                        const avg = total / feedbackData.length;
+                        setMeetingScore(avg.toFixed(1));
                     } else {
                         setMeetingScore('-');
                     }

@@ -50,6 +50,19 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
             if (user) {
                 // 2. Set Profile Data
+                // 3. Fetch Meeting Score (Pure Average)
+                let avgScore = '-';
+                const { data: feedbackData } = await supabase
+                    .from('meetup_feedback')
+                    .select('rating, meetup:meetups!inner(host_id)')
+                    .eq('meetup.host_id', user.id);
+
+                if (feedbackData && feedbackData.length > 0) {
+                    const total = feedbackData.reduce((acc: number, curr: any) => acc + (curr.rating || 0), 0);
+                    const avg = total / feedbackData.length;
+                    avgScore = avg.toFixed(1);
+                }
+
                 setProfileUser({
                     username: user.nickname,
                     name: user.nickname,
@@ -68,9 +81,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                         starPlayer: user.star_player_count || 0,
                         mannerPlayer: user.manner_player_count || 0
                     },
-                    meetingScore: ((user.star_player_count || 0) > 0 || (user.manner_player_count || 0) > 0)
-                        ? Math.min(5.0, 3.5 + ((user.star_player_count || 0) * 0.1) + ((user.manner_player_count || 0) * 0.05)).toFixed(1)
-                        : '-'
+                    meetingScore: avgScore
                 });
 
                 // 3. Fetch Posts
