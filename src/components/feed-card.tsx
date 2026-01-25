@@ -91,6 +91,8 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
             // Add Like
             const { error } = await supabase.from('post_likes').insert({ user_id: currentUser.id, post_id: post.id });
             if (error) {
+                console.error('Like Error:', error);
+                alert(`Failed to like: ${error.message}`);
                 setLiked(originalLiked);
                 setLikeCount(originalCount);
             }
@@ -98,6 +100,8 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
             // Remove Like
             const { error } = await supabase.from('post_likes').delete().match({ user_id: currentUser.id, post_id: post.id });
             if (error) {
+                console.error('Unlike Error:', error);
+                alert(`Failed to remove like: ${error.message}`);
                 setLiked(originalLiked);
                 setLikeCount(originalCount);
             }
@@ -119,7 +123,8 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
         });
 
         if (error) {
-            alert('Failed to post comment.');
+            console.error('Comment Error:', error);
+            alert(`Failed to post comment: ${error.message}`);
             setComments(prev => prev.filter(c => c.id !== newTempComment.id));
         }
     };
