@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 
 interface Post {
     id: string; // UUID
+    userId: string; // UUID of author
     user: string;
     userImg: string;
     image: string;
@@ -152,7 +153,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
         }
     };
 
-    const isOwner = currentUser && post.user === currentUser.user_metadata?.nickname;
+    const isOwner = currentUser && (post.userId === currentUser.id);
 
     return (
         <article className={`relative bg-black ${isModal ? 'rounded-2xl overflow-hidden' : 'border-t border-gray-900 pt-4'}`}>

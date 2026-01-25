@@ -30,6 +30,8 @@ export default function ProfilePage() {
         awards: { starPlayer: 0, mannerPlayer: 0 }
     });
 
+    const [currentUser, setCurrentUser] = useState<any>(null);
+
     // Hydrate Data from Supabase
     useEffect(() => {
         const fetchData = async () => {
@@ -37,6 +39,7 @@ export default function ProfilePage() {
             const { data: { user: authUser } } = await supabase.auth.getUser();
 
             if (authUser) {
+                setCurrentUser(authUser);
                 // 1. Profile
                 const { data: profile } = await supabase
                     .from('users')
@@ -84,6 +87,7 @@ export default function ProfilePage() {
                 if (posts) {
                     setProfilePosts(posts.map(p => ({
                         id: p.id,
+                        userId: authUser.id,
                         image: p.media_url,
                         user: profile?.nickname || 'Me',
                         userImg: profile?.avatar_url || '',
@@ -127,6 +131,11 @@ export default function ProfilePage() {
 
         fetchData();
     }, []);
+
+    const handlePostDelete = (postId: string) => {
+        setProfilePosts(prev => prev.filter(p => p.id !== postId));
+        if (selectedPost?.id === postId) setSelectedPost(null);
+    };
 
     // Helper to format date string ISO -> { month: 'MAY', day: '20' }
     const formatDate = (dateStr: string) => {
@@ -343,6 +352,8 @@ export default function ProfilePage() {
                             post={selectedPost}
                             isModal={true}
                             onUserClick={() => setSelectedPost(null)}
+                            currentUser={currentUser}
+                            onDelete={handlePostDelete}
                         />
                     </div>
                 </div>
