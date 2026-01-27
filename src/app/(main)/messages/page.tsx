@@ -74,17 +74,27 @@ export default function MessagesInboxPage() {
             setLoading(false);
 
             // Fetch Following List for "New Chat"
-            const { data: follows } = await supabase
+            // We use a 2-step process to avoid complex join limitations or RLS issues on joining tables
+            const { data: followRows } = await supabase
                 .from('follows')
-                .select('following:users!following_id(id, nickname, avatar_url)')
+                .select('following_id')
                 .eq('follower_id', user.id);
 
-            if (follows) {
-                setFollowingList(follows.map((f: any) => ({
-                    id: f.following.id,
-                    name: f.following.nickname,
-                    avatar: f.following.avatar_url
-                })));
+            if (followRows && followRows.length > 0) {
+                const followingIds = followRows.map((f: any) => f.following_id);
+
+                const { data: followingUsers } = await supabase
+                    .from('users')
+                    .select('id, nickname, avatar_url')
+                    .in('id', followingIds);
+
+                if (followingUsers) {
+                    setFollowingList(followingUsers.map((u: any) => ({
+                        id: u.id,
+                        name: u.nickname,
+                        avatar: u.avatar_url
+                    })));
+                }
             }
         };
 
