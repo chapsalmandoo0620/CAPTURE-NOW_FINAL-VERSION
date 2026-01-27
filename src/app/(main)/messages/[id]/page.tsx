@@ -108,7 +108,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
         if (error) {
             console.error(error);
-            alert('Failed to send');
+            alert(`Failed to send: ${error.message}`);
         }
     };
 
