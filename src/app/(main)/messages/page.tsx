@@ -27,50 +27,58 @@ export default function MessagesInboxPage() {
             }
             setCurrentUser(user);
 
-            // Fetch all messages where I am sender OR receiver
-            const { data: sent } = await supabase
+            // Fetch all messages where I am sender OR receiver (Raw Fetch)
+            const { data: msgs, error: msgError } = await supabase
                 .from('direct_messages')
-                .select('created_at, text, receiver_id, receiver:users!receiver_id(nickname, avatar_url)')
-                .eq('sender_id', user.id)
+                .select('*')
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
                 .order('created_at', { ascending: false });
 
-            const { data: received } = await supabase
-                .from('direct_messages')
-                .select('created_at, text, sender_id, sender:users!sender_id(nickname, avatar_url)')
-                .eq('receiver_id', user.id)
-                .order('created_at', { ascending: false });
+            if (msgError) {
+                console.error("Error fetching messages:", msgError);
+            }
 
-            // Normalize and Merge
-            const all = [];
-            if (sent) all.push(...sent.map(m => ({
-                partnerId: m.receiver_id,
-                partnerName: (m.receiver as any)?.nickname || 'User',
-                partnerAvatar: (m.receiver as any)?.avatar_url || '',
-                lastMessage: m.text,
-                time: new Date(m.created_at),
-                isMe: true
-            })));
+            const rawMsgs = msgs || [];
 
-            if (received) all.push(...received.map(m => ({
-                partnerId: m.sender_id,
-                partnerName: (m.sender as any)?.nickname || 'User',
-                partnerAvatar: (m.sender as any)?.avatar_url || '',
-                lastMessage: m.text,
-                time: new Date(m.created_at),
-                isMe: false
-            })));
-
-            // Group by Partner ID (Take latest)
+            // Group by Partner ID
             const grouped = new Map();
-            all.forEach(msg => {
-                const existing = grouped.get(msg.partnerId);
-                if (!existing || msg.time > existing.time) {
-                    grouped.set(msg.partnerId, msg);
+            rawMsgs.forEach(m => {
+                const isMe = m.sender_id === user.id;
+                const partnerId = isMe ? m.receiver_id : m.sender_id;
+
+                // Since we ordered by created_at desc, the first one we find is the latest
+                if (!grouped.has(partnerId)) {
+                    grouped.set(partnerId, {
+                        partnerId,
+                        lastMessage: m.text,
+                        time: new Date(m.created_at),
+                        isMe
+                    });
                 }
             });
 
-            const sorted = Array.from(grouped.values()).sort((a, b) => b.time.getTime() - a.time.getTime());
-            setConversations(sorted);
+            const convs = Array.from(grouped.values());
+
+            // Fetch User Details for Partners
+            const partnerIds = convs.map(c => c.partnerId);
+
+            if (partnerIds.length > 0) {
+                const { data: partners } = await supabase
+                    .from('users')
+                    .select('id, nickname, avatar_url')
+                    .in('id', partnerIds);
+
+                const partnerMap = new Map();
+                partners?.forEach(p => partnerMap.set(p.id, p));
+
+                convs.forEach(c => {
+                    const p = partnerMap.get(c.partnerId);
+                    c.partnerName = p?.nickname || 'Unknown User';
+                    c.partnerAvatar = p?.avatar_url || '';
+                });
+            }
+
+            setConversations(convs);
             setLoading(false);
 
             // Fetch Following List for "New Chat"
