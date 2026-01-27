@@ -105,8 +105,9 @@ const DISTANCES = ['< 1km', '1-3km', '3-5km', '5-10km', '10km+'];
 const libraries: ("places")[] = ["places"];
 
 // Haversine Formula for Distance
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-    if (!lat1 || !lon1 || !lat2 || !lon2) return 'Unknown';
+// Haversine Formula for Distance
+function calculateDistanceValue(lat1: number, lon1: number, lat2: number, lon2: number) {
+    if (!lat1 || !lon1 || !lat2 || !lon2) return -1;
     const R = 6371; // Earth radius in km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -114,7 +115,11 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
+    return R * c;
+}
+
+function formatDistance(d: number) {
+    if (d < 0) return 'Unknown';
     return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
 }
 
@@ -325,7 +330,7 @@ export default function MeetPage() {
 
             if (data) {
                 const formatted = data.map(m => {
-                    const dist = calculateDistance(userLat, userLng, m.latitude, m.longitude);
+                    const distValue = calculateDistanceValue(userLat, userLng, m.latitude, m.longitude);
                     return {
                         id: m.id,
                         title: m.title,
@@ -338,7 +343,8 @@ export default function MeetPage() {
                         loc: m.location_name,
                         latitude: m.latitude,
                         longitude: m.longitude,
-                        dist: dist, // Real Distance
+                        dist: formatDistance(distValue),
+                        distValue: distValue, // Numeric Distance for filtering
                         level: m.level,
                         vibe: m.vibe_tag,
                         max: m.max_participants,
@@ -395,7 +401,14 @@ export default function MeetPage() {
         const matchesFilterLevel = filterLevel === 'Any' || meet.level === filterLevel;
         const matchesFilterHost = filterHost === '' || meet.host.toLowerCase().includes(filterHost.toLowerCase());
 
-        return matchesSearch && matchesCategory && matchesFilterSport && matchesFilterLevel && matchesFilterHost;
+        let matchesFilterDist = true;
+        if (filterDist === '< 1km') matchesFilterDist = meet.distValue >= 0 && meet.distValue < 1;
+        else if (filterDist === '1-3km') matchesFilterDist = meet.distValue >= 1 && meet.distValue < 3;
+        else if (filterDist === '3-5km') matchesFilterDist = meet.distValue >= 3 && meet.distValue < 5;
+        else if (filterDist === '5-10km') matchesFilterDist = meet.distValue >= 5 && meet.distValue < 10;
+        else if (filterDist === '10km+') matchesFilterDist = meet.distValue >= 10;
+
+        return matchesSearch && matchesCategory && matchesFilterSport && matchesFilterLevel && matchesFilterHost && matchesFilterDist;
     });
 
     const resetFilters = () => {
@@ -512,7 +525,7 @@ export default function MeetPage() {
                             <div className="space-y-2">
                                 <label className="text-xs text-gray-500 font-bold uppercase">Sport</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {['All', 'Running', 'Soccer', 'Tennis', 'Cycling'].map(s => (
+                                    {CATEGORIES.map(s => (
                                         <button
                                             key={s}
                                             onClick={() => setFilterSport(s)}
