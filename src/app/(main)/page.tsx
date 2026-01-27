@@ -399,9 +399,11 @@ export default function HomePage() {
                             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-neon-green rounded-full border-2 border-black animate-pulse"></span>
                         )}
                     </button>
-                    <button className="group">
-                        <MessageCircle size={24} className="text-gray-300 group-hover:text-neon-green transition-colors" />
-                    </button>
+                    <Link href="/messages">
+                        <button className="group">
+                            <MessageCircle size={24} className="text-gray-300 group-hover:text-neon-green transition-colors" />
+                        </button>
+                    </Link>
                 </div>
             </header>
 
