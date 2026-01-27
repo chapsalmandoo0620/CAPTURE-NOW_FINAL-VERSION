@@ -170,8 +170,12 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                         className="flex items-center gap-3 group"
                         onClick={() => onUserClick?.()}
                     >
-                        <div className="w-9 h-9 rounded-full bg-gray-800 overflow-hidden border border-gray-700 group-hover:border-neon-green transition-colors">
-                            <img src={post.userImg} alt={post.user} className="w-full h-full object-cover" />
+                        <div className="w-9 h-9 rounded-full bg-gray-800 overflow-hidden border border-gray-700 group-hover:border-neon-green transition-colors flex items-center justify-center">
+                            {post.userImg ? (
+                                <img src={post.userImg} alt={post.user} className="w-full h-full object-cover" />
+                            ) : (
+                                <span className="text-lg">👤</span>
+                            )}
                         </div>
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2">
