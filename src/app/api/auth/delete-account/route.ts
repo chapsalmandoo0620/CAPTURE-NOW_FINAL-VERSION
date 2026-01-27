@@ -13,9 +13,25 @@ export async function POST() {
 
     // 2. Init Admin Client (Service Role)
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
     if (!serviceRoleKey) {
         console.error('Missing SUPABASE_SERVICE_ROLE_KEY');
-        return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+        return NextResponse.json({ error: 'Server configuration error: Missing Service Key' }, { status: 500 });
+    }
+
+    // Safety Check: Did user copy the Anon key by mistake?
+    if (serviceRoleKey === anonKey) {
+        console.error('Configuration Error: SUPABASE_SERVICE_ROLE_KEY is same as ANON_KEY');
+        return NextResponse.json({
+            error: 'Configuration Error: You put the Public Anon Key into SUPABASE_SERVICE_ROLE_KEY. Please use the Service Role Secret (starts with ey... but different from Anon Key).'
+        }, { status: 500 });
+    }
+
+    // Basic Format Check
+    if (!serviceRoleKey.startsWith('eyJ')) {
+        console.error('Configuration Error: SUPABASE_SERVICE_ROLE_KEY format invalid');
+        return NextResponse.json({ error: 'Configuration Error: Invalid Service Role Key format. It should be a JWT starting with "eyJ".' }, { status: 500 });
     }
 
     const adminSupabase = createAdminClient(
