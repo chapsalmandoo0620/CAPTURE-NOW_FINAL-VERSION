@@ -140,7 +140,15 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
     }, [decodedUsername]);
 
     const handleFollowToggle = async () => {
-        if (!currentUser || !profileUser) return;
+        if (!currentUser) {
+            alert("Please login to follow.");
+            return;
+        }
+        if (!profileUser?.id) {
+            alert("User data missing.");
+            return;
+        }
+
         const supabase = createClient();
 
         if (isFollowing) {
@@ -150,26 +158,34 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                 .delete()
                 .match({ follower_id: currentUser.id, following_id: profileUser.id });
 
-            if (!error) {
-                setIsFollowing(false);
-                setProfileUser((prev: any) => ({
-                    ...prev,
-                    stats: { ...prev.stats, followers: Math.max(0, prev.stats.followers - 1) }
-                }));
+            if (error) {
+                console.error("Unfollow Error:", error);
+                alert(`Error: ${error.message}`);
+                return;
             }
+
+            setIsFollowing(false);
+            setProfileUser((prev: any) => ({
+                ...prev,
+                stats: { ...prev.stats, followers: Math.max(0, prev.stats.followers - 1) }
+            }));
         } else {
             // Follow
             const { error } = await supabase
                 .from('follows')
                 .insert({ follower_id: currentUser.id, following_id: profileUser.id });
 
-            if (!error) {
-                setIsFollowing(true);
-                setProfileUser((prev: any) => ({
-                    ...prev,
-                    stats: { ...prev.stats, followers: prev.stats.followers + 1 }
-                }));
+            if (error) {
+                console.error("Follow Error:", error);
+                alert(`Error: ${error.message}`);
+                return;
             }
+
+            setIsFollowing(true);
+            setProfileUser((prev: any) => ({
+                ...prev,
+                stats: { ...prev.stats, followers: prev.stats.followers + 1 }
+            }));
         }
     };
 
