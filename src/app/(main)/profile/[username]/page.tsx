@@ -228,7 +228,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                                 <span className="text-xs text-gray-500">Posts</span>
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-xl">{profileUser.stats.followers + (isFollowing ? 1 : 0)}</span>
+                                <span className="font-bold text-xl">{profileUser.stats.followers}</span>
                                 <span className="text-xs text-gray-500">Followers</span>
                             </div>
                             <div className="flex flex-col">
