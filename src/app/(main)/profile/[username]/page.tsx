@@ -63,14 +63,26 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     avgScore = avg.toFixed(1);
                 }
 
+                // 3. Follow Stats (Real Data)
+                const { count: followersCount } = await supabase
+                    .from('follows')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('following_id', user.id);
+
+                const { count: followingCount } = await supabase
+                    .from('follows')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('follower_id', user.id);
+
                 setProfileUser({
+                    id: user.id, // Store ID for follow action
                     username: user.nickname,
                     name: user.nickname,
                     avatar: user.avatar_url || '',
                     bio: user.bio || '',
                     stats: {
-                        followers: Math.floor(Math.random() * 200) + 10, // Mock count
-                        following: Math.floor(Math.random() * 100) + 5
+                        followers: followersCount || 0,
+                        following: followingCount || 0
                     },
                     sports: (user.interests || []).map((s: string) => ({
                         name: s,
@@ -84,7 +96,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     meetingScore: avgScore
                 });
 
-                // 3. Fetch Posts
+                // 4. Fetch Posts
                 const { data: posts } = await supabase
                     .from('highlights')
                     .select('*')
@@ -108,29 +120,57 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     })));
                 }
                 setLoading(false);
+
+                // 5. Check Follow Status (Real Data)
+                const { data: currentUser } = await supabase.auth.getUser();
+                if (currentUser.user) {
+                    const { data: followRel } = await supabase
+                        .from('follows')
+                        .select('*')
+                        .match({ follower_id: currentUser.user.id, following_id: user.id })
+                        .single();
+                    setIsFollowing(!!followRel);
+                }
+
             } else {
                 setLoading(false); // User not found
             }
         };
         fetchData();
-
-        const followingList = JSON.parse(localStorage.getItem('my_following') || '[]');
-        setIsFollowing(followingList.includes(decodedUsername));
     }, [decodedUsername]);
 
-    const handleFollowToggle = () => {
-        const followingList = JSON.parse(localStorage.getItem('my_following') || '[]');
-        let newList;
+    const handleFollowToggle = async () => {
+        if (!currentUser || !profileUser) return;
+        const supabase = createClient();
 
         if (isFollowing) {
-            newList = followingList.filter((u: string) => u !== decodedUsername);
-        } else {
-            newList = [...followingList, decodedUsername];
-        }
+            // Unfollow
+            const { error } = await supabase
+                .from('follows')
+                .delete()
+                .match({ follower_id: currentUser.id, following_id: profileUser.id });
 
-        localStorage.setItem('my_following', JSON.stringify(newList));
-        setIsFollowing(!isFollowing);
-        window.dispatchEvent(new Event('storage'));
+            if (!error) {
+                setIsFollowing(false);
+                setProfileUser((prev: any) => ({
+                    ...prev,
+                    stats: { ...prev.stats, followers: Math.max(0, prev.stats.followers - 1) }
+                }));
+            }
+        } else {
+            // Follow
+            const { error } = await supabase
+                .from('follows')
+                .insert({ follower_id: currentUser.id, following_id: profileUser.id });
+
+            if (!error) {
+                setIsFollowing(true);
+                setProfileUser((prev: any) => ({
+                    ...prev,
+                    stats: { ...prev.stats, followers: prev.stats.followers + 1 }
+                }));
+            }
+        }
     };
 
     const handlePostDelete = (postId: string) => {

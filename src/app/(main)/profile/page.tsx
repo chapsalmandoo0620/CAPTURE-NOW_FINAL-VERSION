@@ -47,6 +47,13 @@ export default function ProfilePage() {
                     .eq('id', authUser.id)
                     .single();
 
+                // 1.5 Real Follow Stats
+                const { count: followers } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', authUser.id);
+                const { count: following } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', authUser.id);
+
+                setFollowersCount(followers || 0);
+                setFollowingCount(following || 0);
+
                 if (profile) {
                     setUser((prev: any) => ({
                         ...prev,
@@ -54,6 +61,7 @@ export default function ProfilePage() {
                         handle: `@${profile.nickname || 'user'}`,
                         avatar: profile.avatar_url || '',
                         bio: profile.bio || 'Ready to capture the moment.',
+                        stats: { posts: 0, followers: followers || 0, following: following || 0 },
                         sports: (profile.interests || []).map((s: string) => ({
                             name: s,
                             level: (profile.skill_levels as any)?.[s] || 'Beginner'
@@ -340,10 +348,10 @@ export default function ProfilePage() {
                                 return (
                                     <Link href={`/meet/${meet.id}`} key={meet.id}>
                                         <div className={`bg-gray-900/50 border rounded-2xl p-4 flex items-center justify-between group hover:border-gray-700 transition-all mb-3 ${isHost && isExpired
-                                                ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
-                                                : isHost
-                                                    ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
-                                                    : 'border-gray-800'
+                                            ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
+                                            : isHost
+                                                ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
+                                                : 'border-gray-800'
                                             }`}>
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-xl bg-gray-800 flex flex-col items-center justify-center border border-gray-700 shrink-0">
