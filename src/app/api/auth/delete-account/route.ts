@@ -31,49 +31,116 @@ export async function POST() {
 
     try {
         const userId = user.id;
+        console.log(`Starting account deletion for user: ${userId}`);
 
-        // 3. Manual Cascade Deletion
-        // We must rigorously delete all dependent rows to avoid Foreign Key violations.
+        // Helper to check errors
+        const checkError = (step: string, error: any) => {
+            if (error) {
+                console.error(`Error in step: ${step}`, error);
+                throw new Error(`${step} failed: ${error.message}`);
+            }
+        };
 
-        // A. Handle Meetups Hosted by User (Need to clear dependencies first)
-        const { data: hostedMeetups } = await adminSupabase
+        // 3. Manual Cascade Deletion (Robust ID-based)
+
+        // A. Handle Meetups Hosted by User
+        // We first need to delete everything ON these meetups.
+        const { data: hostedMeetups, error: meetError } = await adminSupabase
             .from('meetups')
             .select('id')
             .eq('host_id', userId);
+        checkError('Fetch Hosted Meetups', meetError);
 
         const hostedMeetupIds = hostedMeetups?.map(m => m.id) || [];
+        console.log(`Found ${hostedMeetupIds.length} hosted meetups to clear.`);
 
         if (hostedMeetupIds.length > 0) {
-            // Delete feedback on these meetups
-            await adminSupabase.from('meetup_feedback').delete().in('meetup_id', hostedMeetupIds);
-            // Delete participants in these meetups
-            await adminSupabase.from('meetup_participants').delete().in('meetup_id', hostedMeetupIds);
+            // Delete Feedback on hosted meetups
+            const { error: fError } = await adminSupabase
+                .from('meetup_feedback')
+                .delete()
+                .in('meetup_id', hostedMeetupIds);
+            checkError('Delete Feedback on Hosted Meetups', fError);
+
+            // Delete Participants on hosted meetups
+            const { error: pError } = await adminSupabase
+                .from('meetup_participants')
+                .delete()
+                .in('meetup_id', hostedMeetupIds);
+            checkError('Delete Participants on Hosted Meetups', pError);
+
+            // Delete the Meetups themselves
+            const { error: mError } = await adminSupabase
+                .from('meetups')
+                .delete()
+                .in('id', hostedMeetupIds);
+            checkError('Delete Hosted Meetups', mError);
         }
 
-        // B. Handle User's Participation & Activity
-        // Delete feedback created BY user
-        await adminSupabase.from('meetup_feedback').delete().eq('reviewer_id', userId);
-        // Delete feedback RECEIVED by user (star/manner)
-        await adminSupabase.from('meetup_feedback').delete().or(`star_player_id.eq.${userId},manner_player_id.eq.${userId}`);
+        // B. Handle User's Personal Activity (Feedback, Participation, Content)
 
-        // Delete participation in OTHER meetups
-        await adminSupabase.from('meetup_participants').delete().eq('user_id', userId);
+        // 1. Delete Feedback WRITTEN by user
+        // Explicitly selecting to be sure
+        const { error: writtenFeedbackError } = await adminSupabase
+            .from('meetup_feedback')
+            .delete()
+            .eq('reviewer_id', userId);
+        checkError('Delete Written Feedback', writtenFeedbackError);
 
-        // Delete meetups hosted by user (now safe)
-        if (hostedMeetupIds.length > 0) {
-            await adminSupabase.from('meetups').delete().in('id', hostedMeetupIds);
-        }
+        // 2. Delete Feedback RECEIVED (referenced as star/manner player)
+        // This is crucial to avoid "not-null" violations if we are the star player
+        // We do this in two passes to be safe
+        const { error: receivedStarError } = await adminSupabase
+            .from('meetup_feedback')
+            .delete()
+            .eq('star_player_id', userId);
+        checkError('Delete Star Player Feedback', receivedStarError);
 
-        // C. General Content
-        await adminSupabase.from('post_likes').delete().eq('user_id', userId);
-        await adminSupabase.from('post_comments').delete().eq('user_id', userId);
-        await adminSupabase.from('highlights').delete().eq('user_id', userId);
+        const { error: receivedMannerError } = await adminSupabase
+            .from('meetup_feedback')
+            .delete()
+            .eq('manner_player_id', userId);
+        checkError('Delete Manner Player Feedback', receivedMannerError);
 
-        // D. Social & Chat
-        await adminSupabase.from('follows').delete().or(`follower_id.eq.${userId},following_id.eq.${userId}`);
-        await adminSupabase.from('messages').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
-        // Conversations: checking constraint is tricky, but try deleting involving user
-        await adminSupabase.from('conversations').delete().or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+        // 3. Delete Meetup Participation (as a guest)
+        const { error: participationError } = await adminSupabase
+            .from('meetup_participants')
+            .delete()
+            .eq('user_id', userId);
+        checkError('Delete Meetup Participation', participationError);
+
+        // 4. Delete Social (Leads to FK violations in 'users' if not cleared)
+        const { error: followsError1 } = await adminSupabase.from('follows').delete().eq('follower_id', userId);
+        const { error: followsError2 } = await adminSupabase.from('follows').delete().eq('following_id', userId);
+        checkError('Delete Follows 1', followsError1);
+        checkError('Delete Follows 2', followsError2);
+
+        // 5. Delete Content (Likes, Comments, Highlights)
+        const { error: likesError } = await adminSupabase.from('post_likes').delete().eq('user_id', userId);
+        checkError('Delete Likes', likesError);
+
+        const { error: commentsError } = await adminSupabase.from('post_comments').delete().eq('user_id', userId);
+        checkError('Delete Comments', commentsError);
+
+        const { error: postsError } = await adminSupabase.from('highlights').delete().eq('user_id', userId);
+        checkError('Delete Highlights', postsError);
+
+        // 6. Delete Messages (Sender OR Receiver)
+        // Note: Supabase likely doesn't cascade this well automatically.
+        const { error: msgError } = await adminSupabase
+            .from('messages')
+            .delete()
+            .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+        checkError('Delete Messages', msgError);
+
+        const { error: convError } = await adminSupabase
+            .from('conversations')
+            .delete()
+            .or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+        checkError('Delete Conversations', convError);
+
+
+        console.log('Dependencies cleared. Deleting User Profile...');
 
         // 4. Delete Profile Data (Database)
         const { error: dbError } = await adminSupabase
@@ -82,22 +149,28 @@ export async function POST() {
             .eq('id', userId);
 
         if (dbError) {
-            console.error('Database deletion error:', dbError);
-            return NextResponse.json({ error: `Database error deleting user: ${dbError.message}` }, { status: 500 });
+            console.error('Database deletion error (Final Step):', dbError);
+            // This is the specific error user saw. Now we should benefit from previous cleanup.
+            // If it still fails, the error message will be returned clearly.
+            throw new Error(`Database delete failed: ${dbError.message} (Details: ${dbError.details})`);
         }
 
         // 5. Delete Auth User (Authentication)
+        console.log('Profile deleted. Deleting Auth...');
         const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(userId);
 
         if (deleteError) {
             console.error('Auth deletion error:', deleteError);
-            return NextResponse.json({ error: deleteError.message }, { status: 500 });
+            throw new Error(`Auth delete failed: ${deleteError.message}`);
         }
 
         return NextResponse.json({ message: 'Account deleted successfully' });
 
     } catch (error: any) {
-        console.error('Server error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        console.error('Delete Account Handler Error:', error);
+        return NextResponse.json({
+            error: error.message || 'Internal Server Error',
+            details: error.details || 'Check server logs'
+        }, { status: 500 });
     }
 }
