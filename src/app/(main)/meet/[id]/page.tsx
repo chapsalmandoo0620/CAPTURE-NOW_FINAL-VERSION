@@ -6,7 +6,100 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, MapPin, Calendar, Users, MessageCircle, Share2, MoreHorizontal, User, Send, Clock, Home } from 'lucide-react';
 import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
 import { createClient } from '@/lib/supabase/client';
-import MapView from '@/components/map-view';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+
+const MAP_CONTAINER_STYLE = {
+    width: '100%',
+    height: '100%',
+    borderRadius: '1rem',
+};
+
+const MAP_OPTIONS = {
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+            featureType: "administrative.locality",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#263c3f" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#6b9a76" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#38414e" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#212a37" }],
+        },
+        {
+            featureType: "road",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#746855" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#1f2835" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#f3d19c" }],
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#2f3948" }],
+        },
+        {
+            featureType: "transit.station",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#17263c" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#515c6d" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.stroke",
+            stylers: [{ color: "#17263c" }],
+        },
+    ]
+};
+
+const libraries: ("places")[] = ["places"];
 
 export default function MeetDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
@@ -19,6 +112,18 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
     const [chatMessages, setChatMessages] = useState<any[]>([]);
 
     const [myProfile, setMyProfile] = useState<any>(null);
+
+    // Map State
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        libraries
+    });
+
+    // Map Handlers (Optional, mostly for cleanup)
+    const [map, setMap] = useState<google.maps.Map | null>(null);
+    const onLoad = (map: google.maps.Map) => setMap(map);
+    const onUnmount = () => setMap(null);
 
     // Fetch Meetup Data from Supabase
     useEffect(() => {
@@ -337,12 +442,34 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="space-y-2">
                     <h3 className="font-bold text-lg">Location</h3>
                     <div className="aspect-video w-full bg-gray-800 rounded-2xl flex flex-col items-center justify-center border border-gray-700 relative overflow-hidden group">
-                        {meetData.latitude && meetData.longitude ? (
-                            <MapView lat={meetData.latitude} lng={meetData.longitude} />
+                        {meetData.latitude && meetData.longitude && isLoaded ? (
+                            <GoogleMap
+                                mapContainerStyle={MAP_CONTAINER_STYLE}
+                                center={{ lat: meetData.latitude, lng: meetData.longitude }}
+                                zoom={15}
+                                onLoad={onLoad}
+                                onUnmount={onUnmount}
+                                options={MAP_OPTIONS}
+                            >
+                                <Marker
+                                    position={{ lat: meetData.latitude, lng: meetData.longitude }}
+                                    icon={{
+                                        path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+                                        fillColor: "#39FF14", // Neon Green
+                                        fillOpacity: 1,
+                                        strokeWeight: 1,
+                                        strokeColor: "#000000",
+                                        scale: 1.5,
+                                        anchor: new google.maps.Point(12, 24)
+                                    }}
+                                />
+                            </GoogleMap>
                         ) : (
                             <div className="flex flex-col items-center text-gray-500">
                                 <MapPin size={32} className="mb-2 opacity-50" />
-                                <span className="text-xs">No map location provided</span>
+                                <span className="text-xs">
+                                    {!isLoaded ? 'Loading Map...' : 'No map location provided'}
+                                </span>
                             </div>
                         )}
                     </div>
