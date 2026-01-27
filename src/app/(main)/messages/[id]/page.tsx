@@ -1,17 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, use } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Send, MoreVertical, Phone, Video } from 'lucide-react';
 import Image from 'next/image';
 
-export default function ChatPage({ params }: { params: { id: string } }) {
+export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
-    const targetUserId = params.id;
-
-    // Unwrapped params handling for Next.js 15+ (if strictly enforced, but safe to treat as likely sync here or await if async)
-    // We will assume standard behavior for now.
+    const { id: targetUserId } = use(params);
 
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [targetUser, setTargetUser] = useState<any>(null);
@@ -153,8 +150,8 @@ export default function ChatPage({ params }: { params: { id: string } }) {
                     >
                         <div
                             className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${msg.sender_id === currentUser?.id
-                                    ? 'bg-neon-green text-black rounded-tr-none'
-                                    : 'bg-gray-800 text-white rounded-tl-none'
+                                ? 'bg-neon-green text-black rounded-tr-none'
+                                : 'bg-gray-800 text-white rounded-tl-none'
                                 }`}
                         >
                             {msg.text}
