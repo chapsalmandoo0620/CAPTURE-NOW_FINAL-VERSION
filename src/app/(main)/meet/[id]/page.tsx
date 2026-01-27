@@ -83,7 +83,8 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                 max: data.max_participants,
                 participants: formattedParticipants,
                 description: "Join us for an exciting session! Detailed plan will be discussed in the chat.", // Static fallback
-                status: data.status
+                status: data.status,
+                rawEndTime: data.end_time
             });
 
             // 4. Check Joined Status
@@ -384,22 +385,37 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                 {chatMessages.length === 0 && <p className="text-center text-gray-500 text-xs py-4">No messages yet. Say hi!</p>}
                             </div>
 
-                            <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-gray-800">
-                                <input
-                                    type="text"
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 bg-black/50 border border-gray-700 rounded-full px-4 py-2 text-sm focus:border-neon-green focus:outline-none transition-colors"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!message.trim()}
-                                    className="p-2 rounded-full bg-gray-800 text-neon-green disabled:opacity-50 hover:bg-gray-700 transition-colors"
-                                >
-                                    <Send size={20} />
-                                </button>
-                            </form>
+                            {/* Chat Input or Expired Message */}
+                            {meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date() ? (
+                                <div className="py-3 mt-2 border-t border-gray-800 text-center">
+                                    <span className="text-xs text-red-500 font-bold flex items-center justify-center gap-1">
+                                        <Clock size={14} />
+                                        Session Ended - Chat Disabled
+                                    </span>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSendMessage} className="flex gap-2 pt-2 border-t border-gray-800">
+                                    <input
+                                        type="text"
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Type a message..."
+                                        className="flex-1 bg-black/50 border border-gray-700 rounded-full px-4 py-2 text-sm focus:border-neon-green focus:outline-none transition-colors"
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!message.trim()}
+                                        className="p-2 rounded-full bg-gray-800 text-neon-green disabled:opacity-50 hover:bg-gray-700 transition-colors"
+                                    >
+                                        <Send size={20} />
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    ) : meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date() ? (
+                        <div className="h-32 bg-black/20 rounded-xl border border-gray-800/50 flex flex-col items-center justify-center text-gray-500 gap-2">
+                            <Clock size={32} className="opacity-20 text-red-500" />
+                            <span className="text-xs text-red-400 font-bold">Session Ended - Chat Disabled</span>
                         </div>
                     ) : (
                         <div className="h-32 bg-black/20 rounded-xl border border-gray-800/50 flex flex-col items-center justify-center text-gray-500 gap-2">
@@ -426,25 +442,30 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                     ) : (
                         <button
                             onClick={handleJoinToggle}
-                            className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${isJoined
-                                ? 'bg-gray-800 text-gray-400 border border-gray-700 hover:bg-red-900/50 hover:text-red-500 hover:border-red-500'
-                                : 'bg-neon-green text-black hover:bg-[#32D612] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
+                            disabled={meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date()}
+                            className={`w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date()
+                                ? 'bg-gray-800 text-gray-500 border border-gray-700 cursor-not-allowed'
+                                : isJoined
+                                    ? 'bg-gray-800 text-gray-400 border border-gray-700 hover:bg-red-900/50 hover:text-red-500 hover:border-red-500'
+                                    : 'bg-neon-green text-black hover:bg-[#32D612] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
                                 }`}
                         >
-                            {isJoined ? 'Leave Session' : 'Join Session'}
+                            {meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date()
+                                ? 'Session Ended'
+                                : isJoined ? 'Leave Session' : 'Join Session'}
                         </button>
                     )}
                 </div>
 
                 {/* Feedback Modal */}
-                <MeetupFeedbackModal
+                < MeetupFeedbackModal
                     isOpen={showFeedbackModal}
                     onClose={() => setShowFeedbackModal(false)}
                     meetupTitle={meetData.title}
                     participants={meetData.participants}
                     onSubmit={handleFeedbackSubmit}
                 />
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }

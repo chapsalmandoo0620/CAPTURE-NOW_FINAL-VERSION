@@ -472,10 +472,10 @@ export default function MeetPage() {
                                 <div
                                     key={meet.id}
                                     className={`bg-gray-900/50 border rounded-2xl p-5 hover:border-gray-700 transition-all group relative overflow-hidden ${isHost && isExpired
-                                            ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
-                                            : isHost
-                                                ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
-                                                : 'border-gray-800'
+                                        ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
+                                        : isHost
+                                            ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
+                                            : 'border-gray-800'
                                         }`}
                                 >
                                     {meet.status === 'Closing Soon' && (
@@ -539,12 +539,15 @@ export default function MeetPage() {
                                             {!isHost && (
                                                 <button
                                                     onClick={(e) => handleJoinClick(e, meet)}
-                                                    className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${joinedMeets.includes(meet.id.toString())
-                                                        ? 'bg-gray-800 border-gray-600 text-white hover:bg-red-900/50 hover:border-red-500'
-                                                        : 'bg-neon-green border-neon-green text-black hover:bg-[#32D612]'
+                                                    disabled={isExpired}
+                                                    className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${isExpired
+                                                            ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
+                                                            : joinedMeets.includes(meet.id.toString())
+                                                                ? 'bg-gray-800 border-gray-600 text-white hover:bg-red-900/50 hover:border-red-500'
+                                                                : 'bg-neon-green border-neon-green text-black hover:bg-[#32D612]'
                                                         }`}
                                                 >
-                                                    {joinedMeets.includes(meet.id.toString()) ? 'Joined' : 'Join'}
+                                                    {isExpired ? 'Ended' : joinedMeets.includes(meet.id.toString()) ? 'Joined' : 'Join'}
                                                 </button>
                                             )}
 
