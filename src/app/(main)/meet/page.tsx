@@ -225,15 +225,26 @@ export default function MeetPage() {
                         max: m.max_participants,
                         participants: m.participants.length,
                         status: m.status,
-                        start_time: m.start_time // Keep for sorting
+                        start_time: m.start_time, // Keep for sorting
+                        rawEndTime: m.end_time // Keep for expiration check
                     };
                 });
 
                 // Sorting Logic
-                // Priority: Hosted by Me -> Joined by Me -> Start Time Ascending
+                // Priority: Hosted & Expired -> Hosted by Me -> Joined by Me -> Start Time Ascending
                 formatted.sort((a, b) => {
+                    const now = new Date();
+                    const aExpired = a.rawEndTime && new Date(a.rawEndTime) < now;
+                    const bExpired = b.rawEndTime && new Date(b.rawEndTime) < now;
+
                     const aHosted = a.hostId === myId;
                     const bHosted = b.hostId === myId;
+
+                    // 1. Hosted & Expired (Top Priority)
+                    if (aHosted && aExpired && !(bHosted && bExpired)) return -1;
+                    if (!(aHosted && aExpired) && (bHosted && bExpired)) return 1;
+
+                    // 2. Hosted by Me
                     if (aHosted && !bHosted) return -1;
                     if (!aHosted && bHosted) return 1;
 
@@ -455,10 +466,16 @@ export default function MeetPage() {
                     <div className="space-y-4">
                         {filteredMeets.length > 0 ? filteredMeets.map(meet => {
                             const isHost = meet.host === 'Me' || (myProfile && (meet.host === myProfile.nickname || meet.hostId === myProfile.id));
+                            const isExpired = meet.rawEndTime && new Date(meet.rawEndTime) < new Date();
+
                             return (
                                 <div
                                     key={meet.id}
-                                    className={`bg-gray-900/50 border rounded-2xl p-5 hover:border-gray-700 transition-all group relative overflow-hidden ${isHost ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]' : 'border-gray-800'
+                                    className={`bg-gray-900/50 border rounded-2xl p-5 hover:border-gray-700 transition-all group relative overflow-hidden ${isHost && isExpired
+                                            ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
+                                            : isHost
+                                                ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
+                                                : 'border-gray-800'
                                         }`}
                                 >
                                     {meet.status === 'Closing Soon' && (
