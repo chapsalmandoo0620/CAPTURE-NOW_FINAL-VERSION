@@ -32,10 +32,50 @@ export async function POST() {
     try {
         const userId = user.id;
 
-        // 3. Delete Profile Data (Database)
-        // Ideally handled by CASCADE, but explicit delete safeguards against orphan rows if constraints are missing.
-        // We delete from 'users' table using the admin client to bypass RLS potentially (though user can delete own).
-        // Using admin client ensures it works regardless of RLS policies for simple user deletion.
+        // 3. Manual Cascade Deletion
+        // We must rigorously delete all dependent rows to avoid Foreign Key violations.
+
+        // A. Handle Meetups Hosted by User (Need to clear dependencies first)
+        const { data: hostedMeetups } = await adminSupabase
+            .from('meetups')
+            .select('id')
+            .eq('host_id', userId);
+
+        const hostedMeetupIds = hostedMeetups?.map(m => m.id) || [];
+
+        if (hostedMeetupIds.length > 0) {
+            // Delete feedback on these meetups
+            await adminSupabase.from('meetup_feedback').delete().in('meetup_id', hostedMeetupIds);
+            // Delete participants in these meetups
+            await adminSupabase.from('meetup_participants').delete().in('meetup_id', hostedMeetupIds);
+        }
+
+        // B. Handle User's Participation & Activity
+        // Delete feedback created BY user
+        await adminSupabase.from('meetup_feedback').delete().eq('reviewer_id', userId);
+        // Delete feedback RECEIVED by user (star/manner)
+        await adminSupabase.from('meetup_feedback').delete().or(`star_player_id.eq.${userId},manner_player_id.eq.${userId}`);
+
+        // Delete participation in OTHER meetups
+        await adminSupabase.from('meetup_participants').delete().eq('user_id', userId);
+
+        // Delete meetups hosted by user (now safe)
+        if (hostedMeetupIds.length > 0) {
+            await adminSupabase.from('meetups').delete().in('id', hostedMeetupIds);
+        }
+
+        // C. General Content
+        await adminSupabase.from('post_likes').delete().eq('user_id', userId);
+        await adminSupabase.from('post_comments').delete().eq('user_id', userId);
+        await adminSupabase.from('highlights').delete().eq('user_id', userId);
+
+        // D. Social & Chat
+        await adminSupabase.from('follows').delete().or(`follower_id.eq.${userId},following_id.eq.${userId}`);
+        await adminSupabase.from('messages').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`);
+        // Conversations: checking constraint is tricky, but try deleting involving user
+        await adminSupabase.from('conversations').delete().or(`user1_id.eq.${userId},user2_id.eq.${userId}`);
+
+        // 4. Delete Profile Data (Database)
         const { error: dbError } = await adminSupabase
             .from('users')
             .delete()
@@ -43,11 +83,10 @@ export async function POST() {
 
         if (dbError) {
             console.error('Database deletion error:', dbError);
-            // Non-blocking? If profile delete fails, might not want to delete Auth.
-            // But let's assume we want to force delete.
+            return NextResponse.json({ error: `Database error deleting user: ${dbError.message}` }, { status: 500 });
         }
 
-        // 4. Delete Auth User (Authentication)
+        // 5. Delete Auth User (Authentication)
         const { error: deleteError } = await adminSupabase.auth.admin.deleteUser(userId);
 
         if (deleteError) {
