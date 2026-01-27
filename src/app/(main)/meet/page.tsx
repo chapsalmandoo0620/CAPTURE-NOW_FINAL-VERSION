@@ -102,6 +102,8 @@ const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Any'];
 const VIBES = ['Competitive', 'Fun', 'Training'];
 const DISTANCES = ['< 1km', '1-3km', '3-5km', '5-10km', '10km+'];
 
+const libraries: ("places")[] = ["places"];
+
 // Haversine Formula for Distance
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
     if (!lat1 || !lon1 || !lat2 || !lon2) return 'Unknown';
@@ -125,7 +127,8 @@ export default function MeetPage() {
     // Map State
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        libraries
     });
     const [map, setMap] = useState<google.maps.Map | null>(null);
 
