@@ -122,14 +122,39 @@ export default function ProfilePage() {
                         .map((p: any) => p.meetup)
                         .filter((m: any) => m && m.status !== 'finished');
 
-                    setJoinedMeets(activeMeets.map((m: any) => ({
+                    const formattedJoined = activeMeets.map((m: any) => ({
                         id: m.id,
                         title: m.title,
                         date: m.start_time, // Use ISO string for reliable parsing
                         start_time: m.start_time,
+                        rawEndTime: m.end_time,
+                        hostId: m.host_id,
                         loc: m.location_name || 'Unknown',
                         sport: m.category || 'Event'
-                    })));
+                    }));
+
+                    // Sort Logic (Matches meet/page.tsx)
+                    formattedJoined.sort((a: any, b: any) => {
+                        const now = new Date();
+                        const aExpired = a.rawEndTime && new Date(a.rawEndTime) < now;
+                        const bExpired = b.rawEndTime && new Date(b.rawEndTime) < now;
+
+                        const aHosted = a.hostId === authUser.id;
+                        const bHosted = b.hostId === authUser.id;
+
+                        // 1. Hosted & Expired (Top Priority)
+                        if (aHosted && aExpired && !(bHosted && bExpired)) return -1;
+                        if (!(aHosted && aExpired) && (bHosted && bExpired)) return 1;
+
+                        // 2. Hosted by Me
+                        if (aHosted && !bHosted) return -1;
+                        if (!aHosted && bHosted) return 1;
+
+                        // 3. Date Ascending
+                        return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+                    });
+
+                    setJoinedMeets(formattedJoined);
                 }
             }
         };
@@ -309,16 +334,27 @@ export default function ProfilePage() {
                         <div className="p-4 space-y-3">
                             {joinedMeets.length > 0 ? joinedMeets.map((meet) => {
                                 const { month, day } = formatDate(meet.date);
+                                const isHost = meet.hostId === currentUser?.id;
+                                const isExpired = meet.rawEndTime && new Date(meet.rawEndTime) < new Date();
+
                                 return (
                                     <Link href={`/meet/${meet.id}`} key={meet.id}>
-                                        <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4 flex items-center justify-between group hover:border-gray-700 transition-all mb-3">
+                                        <div className={`bg-gray-900/50 border rounded-2xl p-4 flex items-center justify-between group hover:border-gray-700 transition-all mb-3 ${isHost && isExpired
+                                                ? 'border-red-500 shadow-[0_0_15px_rgba(255,0,0,0.2)]'
+                                                : isHost
+                                                    ? 'border-neon-green shadow-[0_0_10px_rgba(57,255,20,0.1)]'
+                                                    : 'border-gray-800'
+                                            }`}>
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-xl bg-gray-800 flex flex-col items-center justify-center border border-gray-700 shrink-0">
                                                     <span className="text-[10px] font-bold text-red-500 uppercase">{month}</span>
                                                     <span className="text-lg font-bold leading-none mt-0.5">{day}</span>
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-sm mb-0.5 group-hover:text-neon-green transition-colors">{meet.title}</h3>
+                                                    <h3 className="font-bold text-sm mb-0.5 group-hover:text-neon-green transition-colors flex items-center gap-2">
+                                                        {meet.title}
+                                                        {isHost && isExpired && <span className="text-[10px] text-red-500 border border-red-500 px-1 rounded">Ended</span>}
+                                                    </h3>
                                                     <div className="flex items-center gap-2 text-xs text-gray-400">
                                                         <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.loc}</span>
                                                         <span className="w-0.5 h-0.5 rounded-full bg-gray-600"></span>
