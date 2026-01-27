@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Grid, MoreHorizontal, UserCheck, UserPlus, X, ThumbsUp, Star, Award } from 'lucide-react';
+import { ChevronLeft, Grid, MoreHorizontal, UserCheck, UserPlus, X, ThumbsUp, Star, Award, MessageCircle } from 'lucide-react';
 import FeedCard from '@/components/feed-card';
 import { createClient } from '@/lib/supabase/client';
 
@@ -285,23 +285,32 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                     </div>
 
                     {/* Follow Action */}
-                    <button
-                        onClick={handleFollowToggle}
-                        className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isFollowing
-                            ? 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50'
-                            : 'bg-neon-green text-black hover:bg-[#32D612] shadow-[0_0_15px_rgba(57,255,20,0.3)]'
-                            }`}
-                    >
-                        {isFollowing ? (
-                            <>
-                                <UserCheck size={20} /> Following
-                            </>
-                        ) : (
-                            <>
-                                <UserPlus size={20} /> Follow
-                            </>
-                        )}
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleFollowToggle}
+                            className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isFollowing
+                                ? 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50'
+                                : 'bg-neon-green text-black hover:bg-[#32D612] shadow-[0_0_15px_rgba(57,255,20,0.3)]'
+                                }`}
+                        >
+                            {isFollowing ? (
+                                <>
+                                    <UserCheck size={20} /> Following
+                                </>
+                            ) : (
+                                <>
+                                    <UserPlus size={20} /> Follow
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => router.push(`/messages/${profileUser.id}`)}
+                            className="bg-gray-900 border border-gray-800 rounded-xl px-4 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+                        >
+                            <MessageCircle size={24} />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Grid Content */}
