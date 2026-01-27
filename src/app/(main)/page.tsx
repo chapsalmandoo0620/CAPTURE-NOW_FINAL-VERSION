@@ -5,6 +5,7 @@ import { Bell, MessageCircle, Heart, MessageSquare, Send, Aperture, MapPin, Cloc
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import FeedCard from '@/components/feed-card';
+import NotificationDrawer, { NotificationItem } from '@/components/notification-drawer';
 
 // Helper for Emojis
 function getEmoji(sport: string) {
@@ -34,6 +35,22 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
 }
 
+// Time Helper
+function getTimeAgo(isoString: string) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
+}
+
 export default function HomePage() {
     const [posts, setPosts] = useState<any[]>([]);
     const [quickMeets, setQuickMeets] = useState<any[]>([]);
@@ -41,6 +58,93 @@ export default function HomePage() {
     const [isLiveJoined, setIsLiveJoined] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
+
+    // Notification State
+    const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    const checkMeetupReminders = (meetups: any[]) => {
+        const reminders: NotificationItem[] = [];
+        const now = new Date().getTime();
+
+        meetups.forEach(meet => {
+            const startStr = meet.start_time; // assuming UTC generic
+            if (!startStr) return;
+            const start = new Date(startStr).getTime();
+            const diffMs = start - now;
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            // Logic: 24h, 12h, 6h, 1h
+            // We define a window (e.g. ± 30 mins) to catch the event roughly
+            // Since this runs client side on load, it's not a perfect cron job.
+            // We'll just check if it's "Upcoming" in logical buckets for the UI display.
+
+            let reminderType = null;
+            if (diffHours > 0 && diffHours <= 1.1) reminderType = "Starting in 1 hour!";
+            else if (diffHours > 5 && diffHours <= 6.1) reminderType = "Starting in 6 hours!";
+            else if (diffHours > 11 && diffHours <= 12.5) reminderType = "Starting in 12 hours";
+            else if (diffHours > 23 && diffHours <= 24.5) reminderType = "Starting tomorrow (24h)";
+
+            if (reminderType) {
+                reminders.push({
+                    id: `reminder-${meet.id}-${reminderType}`,
+                    type: 'reminder',
+                    title: reminderType,
+                    message: `Get ready for ${meet.title}!`,
+                    timestamp: now, // Show as "Now" relevant
+                    time: 'Upcoming',
+                    link: `/meet/${meet.id}`,
+                    read: false // managed by timestamp check
+                });
+            }
+        });
+        return reminders;
+    };
+
+    const checkFeedbackNeeded = async (userId: string, supabase: any) => {
+        // Find joined meetups that are Finished (or past end_time)
+        // AND user has NOT given feedback
+        const now = new Date();
+        const { data: joined } = await supabase
+            .from('meetup_participants')
+            .select('meetup_id, meetups(*)')
+            .eq('user_id', userId);
+
+        if (!joined) return [];
+
+        const feedbackNotifs: NotificationItem[] = [];
+
+        for (const record of joined) {
+            const m = record.meetups;
+            if (!m) continue;
+
+            // manually check expired if status isn't reliable
+            const isExpired = m.end_time && new Date(m.end_time) < now;
+            if (isExpired) {
+                // Check if feedback exists
+                const { data: fb } = await supabase
+                    .from('meetup_feedback')
+                    .select('id')
+                    .match({ meetup_id: m.id, reviewer_id: userId })
+                    .single();
+
+                if (!fb) {
+                    feedbackNotifs.push({
+                        id: `feedback-${m.id}`,
+                        type: 'feedback',
+                        title: 'Meeting Ended',
+                        message: `${m.title} has ended. Please leave feedback!`,
+                        timestamp: new Date(m.end_time || now).getTime(),
+                        time: getTimeAgo(m.end_time || now.toISOString()),
+                        link: `/meet/${m.id}`, // Detail page opens feedback modal
+                        read: false
+                    });
+                }
+            }
+        }
+        return feedbackNotifs;
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -77,7 +181,109 @@ export default function HomePage() {
 
             // 1.5 Get User Location for Distance Calc
             const { data: { user } } = await supabase.auth.getUser();
-            if (user) setCurrentUser(user);
+            if (user) {
+                setCurrentUser(user);
+
+                // --- NOTIFICATION AGGREGATION ---
+                const fetchNotifications = async () => {
+                    const allNotifs: NotificationItem[] = [];
+
+                    // A. Social (Likes & Comments on MY posts)
+                    const { data: myPosts } = await supabase
+                        .from('highlights')
+                        .select('id, caption')
+                        .eq('user_id', user.id);
+
+                    if (myPosts && myPosts.length > 0) {
+                        const myPostIds = myPosts.map(p => p.id);
+
+                        // Likes
+                        const { data: likes } = await supabase
+                            .from('post_likes')
+                            .select('created_at, user:users(nickname), post_id')
+                            .in('post_id', myPostIds)
+                            .neq('user_id', user.id) // Not my own like
+                            .order('created_at', { ascending: false })
+                            .limit(20);
+
+                        if (likes) {
+                            likes.forEach(like => {
+                                allNotifs.push({
+                                    id: `like-${like.post_id}-${like.created_at}`,
+                                    type: 'like',
+                                    title: 'New Like',
+                                    message: `${(like.user as any)?.nickname || 'Someone'} liked your post.`,
+                                    timestamp: new Date(like.created_at).getTime(),
+                                    time: getTimeAgo(like.created_at),
+                                    link: `/profile`, // ideally jump to post, strictly profile for MVP
+                                    read: false
+                                });
+                            });
+                        }
+
+                        // Comments
+                        const { data: comments } = await supabase
+                            .from('post_comments')
+                            .select('created_at, text, user:users(nickname), post_id')
+                            .in('post_id', myPostIds)
+                            .neq('user_id', user.id)
+                            .order('created_at', { ascending: false })
+                            .limit(20);
+
+                        if (comments) {
+                            comments.forEach(c => {
+                                allNotifs.push({
+                                    id: `comment-${c.post_id}-${c.created_at}`,
+                                    type: 'comment',
+                                    title: 'New Comment',
+                                    message: `${(c.user as any)?.nickname || 'Someone'} commented: "${c.text}"`,
+                                    timestamp: new Date(c.created_at).getTime(),
+                                    time: getTimeAgo(c.created_at),
+                                    link: `/profile`,
+                                    read: false
+                                });
+                            });
+                        }
+                    }
+
+                    // B. Meetup Reminders & Feedback
+                    // Get Joined Active Meetups
+                    const { data: joined } = await supabase
+                        .from('meetup_participants')
+                        .select('meetups(*)')
+                        .eq('user_id', user.id);
+
+                    if (joined) {
+                        const myMeets = joined.map((j: any) => j.meetups).filter(Boolean);
+                        const reminders = checkMeetupReminders(myMeets);
+                        allNotifs.push(...reminders);
+                    }
+
+                    const feedbacks = await checkFeedbackNeeded(user.id, supabase);
+                    allNotifs.push(...feedbacks);
+
+                    // Sort
+                    allNotifs.sort((a, b) => b.timestamp - a.timestamp);
+
+                    // Read Status Logic
+                    // We use LocalStorage to store the "last read timestamp". 
+                    // Anything newer than that is unread.
+                    const lastReadTime = localStorage.getItem('last_notif_read_time');
+                    const lastReadTs = lastReadTime ? parseInt(lastReadTime) : 0;
+
+                    const markedNotifs = allNotifs.map(n => ({
+                        ...n,
+                        read: n.timestamp <= lastReadTs
+                    }));
+
+                    const unread = markedNotifs.filter(n => !n.read).length;
+
+                    setNotifications(markedNotifs);
+                    setUnreadCount(unread);
+                }
+
+                fetchNotifications();
+            }
 
             let userLat = 0;
             let userLng = 0;
@@ -163,8 +369,20 @@ export default function HomePage() {
         setPosts(prev => prev.filter(p => p.id !== postId));
     };
 
+    // Notification Logic
+    const toggleNotifications = () => {
+        if (!showNotifications) {
+            // Opening: Mark all as read
+            const now = new Date().getTime();
+            localStorage.setItem('last_notif_read_time', now.toString());
+            setUnreadCount(0);
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        }
+        setShowNotifications(!showNotifications);
+    };
+
     return (
-        <div className="bg-black text-white min-h-screen pb-24">
+        <div className="bg-black text-white min-h-screen pb-24 relative overflow-x-hidden">
             {/* Header */}
             <header className="sticky top-0 bg-black/80 backdrop-blur-md z-40 px-4 py-3 flex justify-between items-center border-b border-gray-900">
                 <div className="flex items-center gap-0.5">
@@ -172,15 +390,26 @@ export default function HomePage() {
                     <Zap className="text-neon-green w-6 h-6 fill-neon-green/20" strokeWidth={2.5} />
                 </div>
                 <div className="flex gap-4">
-                    <button className="relative group">
+                    <button
+                        onClick={toggleNotifications}
+                        className="relative group p-1"
+                    >
                         <Bell size={24} className="text-gray-300 group-hover:text-neon-green transition-colors" />
-                        <span className="absolute top-0 right-0 w-2 h-2 bg-neon-green rounded-full border border-black"></span>
+                        {unreadCount > 0 && (
+                            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-neon-green rounded-full border-2 border-black animate-pulse"></span>
+                        )}
                     </button>
                     <button className="group">
                         <MessageCircle size={24} className="text-gray-300 group-hover:text-neon-green transition-colors" />
                     </button>
                 </div>
             </header>
+
+            <NotificationDrawer
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+                notifications={notifications}
+            />
 
             {/* Banner */}
             {liveMeet && (
