@@ -8,14 +8,35 @@ import { createClient } from '@/lib/supabase/client';
 export default function MenuPage() {
     const router = useRouter();
 
+    const handleDeleteAccount = async () => {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.') &&
+            confirm('Really delete? All your data will be permanently removed.')) {
+
+            try {
+                const response = await fetch('/api/auth/delete-account', {
+                    method: 'POST',
+                });
+
+                if (response.ok) {
+                    const supabase = createClient();
+                    await supabase.auth.signOut();
+                    alert('Account deleted successfully.');
+                    router.push('/login');
+                } else {
+                    const data = await response.json();
+                    alert(`Failed to delete account: ${data.error}`);
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                alert('An error occurred while deleting account.');
+            }
+        }
+    };
+
     const handleLogout = async () => {
         if (confirm('Are you sure you want to logout?')) {
             const supabase = createClient();
             await supabase.auth.signOut();
-            // Clear any app-specific local storage if strictly needed, but Auth is key
-            // localStorage.clear(); // Optional: Clear all or just auth keys
-            // Doing a hard clear might lose 'onboarding' state if we want to preserve it, but fine for now.
-            // Let's just signOut and redirect.
             router.push('/login');
         }
     };
@@ -79,14 +100,24 @@ export default function MenuPage() {
                     </div>
                 </div>
 
-                {/* Logout Button */}
-                <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-gray-900/50 text-red-500 font-bold hover:bg-red-500/10 border border-gray-800 hover:border-red-500/30 transition-all mt-8"
-                >
-                    <LogOut size={18} />
-                    Log Out
-                </button>
+                {/* Danger Zone */}
+                <div className="mt-8 space-y-3">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-gray-900/50 text-gray-400 font-bold hover:bg-gray-800 border border-gray-800 transition-all"
+                    >
+                        <LogOut size={18} />
+                        Log Out
+                    </button>
+
+                    <button
+                        onClick={handleDeleteAccount}
+                        className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-500/10 text-red-500 font-bold hover:bg-red-500/20 border border-red-500/50 transition-all"
+                    >
+                        <Shield size={18} />
+                        Delete Account
+                    </button>
+                </div>
 
                 <div className="text-center">
                     <p className="text-[10px] text-gray-600">
