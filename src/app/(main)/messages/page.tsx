@@ -11,6 +11,7 @@ export default function MessagesInboxPage() {
     const [conversations, setConversations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     // New Chat State
     const [showNewChat, setShowNewChat] = useState(false);
@@ -119,13 +120,15 @@ export default function MessagesInboxPage() {
                 <h1 className="font-bold text-lg">Messages</h1>
             </header>
 
-            {/* Search (Visual Only for MVP) */}
+            {/* Search (Visual Only for MVP) -> Now Functional */}
             <div className="p-4">
                 <div className="bg-gray-900 rounded-xl flex items-center px-4 py-3 gap-2 border border-gray-800">
                     <Search size={18} className="text-gray-500" />
                     <input
                         type="text"
                         placeholder="Search messages..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                         className="bg-transparent border-none focus:outline-none text-sm w-full"
                     />
                 </div>
@@ -142,33 +145,35 @@ export default function MessagesInboxPage() {
                     </div>
                 )}
 
-                {conversations.map(conv => (
-                    <Link key={conv.partnerId} href={`/messages/${conv.partnerId}`}>
-                        <div className="flex items-center gap-4 py-3 border-b border-gray-900 hover:bg-gray-900/40 -mx-2 px-2 rounded-xl transition-colors">
-                            <div className="w-12 h-12 rounded-full bg-gray-800 shrink-0 overflow-hidden border border-gray-700">
-                                {conv.partnerAvatar ? (
-                                    <img src={conv.partnerAvatar} alt={conv.partnerName} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">IMG</div>
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-center mb-0.5">
-                                    <h3 className="font-bold text-sm truncate">{conv.partnerName}</h3>
-                                    <span className="text-[10px] text-gray-500">
-                                        {conv.time.toLocaleDateString() === new Date().toLocaleDateString()
-                                            ? conv.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                                            : conv.time.toLocaleDateString()}
-                                    </span>
+                {conversations
+                    .filter(c => c.partnerName.toLowerCase().includes(searchQuery.toLowerCase()))
+                    .map(conv => (
+                        <Link key={conv.partnerId} href={`/messages/${conv.partnerId}`}>
+                            <div className="flex items-center gap-4 py-3 border-b border-gray-900 hover:bg-gray-900/40 -mx-2 px-2 rounded-xl transition-colors">
+                                <div className="w-12 h-12 rounded-full bg-gray-800 shrink-0 overflow-hidden border border-gray-700">
+                                    {conv.partnerAvatar ? (
+                                        <img src={conv.partnerAvatar} alt={conv.partnerName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <img src="/default-profile.png" alt="Default" className="w-full h-full object-cover" />
+                                    )}
                                 </div>
-                                <p className="text-xs text-gray-400 truncate">
-                                    {conv.isMe && <span className="text-gray-600 mr-1">You:</span>}
-                                    {conv.lastMessage}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-center mb-0.5">
+                                        <h3 className="font-bold text-sm truncate">{conv.partnerName}</h3>
+                                        <span className="text-[10px] text-gray-500">
+                                            {conv.time.toLocaleDateString() === new Date().toLocaleDateString()
+                                                ? conv.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                : conv.time.toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-400 truncate">
+                                        {conv.isMe && <span className="text-gray-600 mr-1">You:</span>}
+                                        {conv.lastMessage}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    ))}
 
                 {/* New Chat FAB */}
                 <button
@@ -203,7 +208,7 @@ export default function MessagesInboxPage() {
                                                     {f.avatar ? (
                                                         <img src={f.avatar} alt={f.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-[10px]">👤</div>
+                                                        <img src="/default-profile.png" alt="Default" className="w-full h-full object-cover" />
                                                     )}
                                                 </div>
                                                 <span className="font-bold text-sm">{f.name}</span>

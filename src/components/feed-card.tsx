@@ -174,7 +174,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                             {post.userImg ? (
                                 <img src={post.userImg} alt={post.user} className="w-full h-full object-cover" />
                             ) : (
-                                <span className="text-lg">👤</span>
+                                <img src="/default-profile.png" alt="Default" className="w-full h-full object-cover" />
                             )}
                         </div>
                         <div className="flex flex-col">

@@ -218,7 +218,7 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                             {profileUser.avatar ? (
                                 <img src={profileUser.avatar} alt="Profile" className="w-full h-full rounded-full object-cover" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-900 text-3xl">👤</div>
+                                <img src="/default-profile.png" alt="Default" className="w-full h-full rounded-full object-cover" />
                             )}
                         </div>
 

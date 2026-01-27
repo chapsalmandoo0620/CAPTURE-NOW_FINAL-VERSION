@@ -126,7 +126,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                                 {targetUser.avatar_url ? (
                                     <img src={targetUser.avatar_url} alt="User" className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs">U</div>
+                                    <img src="/default-profile.png" alt="Default" className="w-full h-full object-cover" />
                                 )}
                             </div>
                             <span className="font-bold text-sm">{targetUser.nickname || 'User'}</span>
