@@ -1,9 +1,101 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Map as MapIcon, List, Filter, Calendar, MapPin, Plus, X, ChevronDown, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
+import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+
+const MAP_CONTAINER_STYLE = {
+    width: '100%',
+    height: '60vh',
+    borderRadius: '1rem',
+};
+
+const MAP_OPTIONS = {
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+            featureType: "administrative.locality",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#263c3f" }],
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#6b9a76" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#38414e" }],
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#212a37" }],
+        },
+        {
+            featureType: "road",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#746855" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#1f2835" }],
+        },
+        {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#f3d19c" }],
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#2f3948" }],
+        },
+        {
+            featureType: "transit.station",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+        },
+        {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#17263c" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#515c6d" }],
+        },
+        {
+            featureType: "water",
+            elementType: "labels.text.stroke",
+            stylers: [{ color: "#17263c" }],
+        },
+    ]
+};
 
 const CATEGORIES = ['All', 'Running', 'Cycle', 'Soccer', 'Basketball', 'Tennis', 'Golf', 'Climbing', 'Fitness', 'Yoga', 'Swimming', 'Hiking', 'Skating', 'Surfing', 'Badminton', 'Boxing', 'MMA', 'Crossfit'];
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Any'];
@@ -30,10 +122,33 @@ export default function MeetPage() {
     const [activeCategory, setActiveCategory] = useState('All');
     const [showFilter, setShowFilter] = useState(false);
 
+    // Map State
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+    });
+    const [map, setMap] = useState<google.maps.Map | null>(null);
+
+    const onLoad = useCallback(function callback(map: google.maps.Map) {
+        setMap(map);
+    }, []);
+
+    const onUnmount = useCallback(function callback(map: google.maps.Map) {
+        setMap(null);
+    }, []);
+
     // Data State
     const [meets, setMeets] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [myProfile, setMyProfile] = useState<any>(null);
+    const [myLocation, setMyLocation] = useState<{ lat: number, lng: number } | null>(null);
+
+    // Center map on user when loaded
+    useEffect(() => {
+        if (map && myLocation && view === 'map') {
+            map.panTo(myLocation);
+        }
+    }, [map, view, myLocation]);
 
     // Filter Logic State
     const [filterSport, setFilterSport] = useState('All');
@@ -180,6 +295,7 @@ export default function MeetPage() {
                     setMyProfile({ id: user.id, nickname: profile.nickname });
                     userLat = profile.latitude;
                     userLng = profile.longitude;
+                    setMyLocation({ lat: userLat, lng: userLng });
                 }
 
                 // Fetch joined meetups
@@ -541,10 +657,10 @@ export default function MeetPage() {
                                                     onClick={(e) => handleJoinClick(e, meet)}
                                                     disabled={isExpired}
                                                     className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all ${isExpired
-                                                            ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
-                                                            : joinedMeets.includes(meet.id.toString())
-                                                                ? 'bg-gray-800 border-gray-600 text-white hover:bg-red-900/50 hover:border-red-500'
-                                                                : 'bg-neon-green border-neon-green text-black hover:bg-[#32D612]'
+                                                        ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
+                                                        : joinedMeets.includes(meet.id.toString())
+                                                            ? 'bg-gray-800 border-gray-600 text-white hover:bg-red-900/50 hover:border-red-500'
+                                                            : 'bg-neon-green border-neon-green text-black hover:bg-[#32D612]'
                                                         }`}
                                                 >
                                                     {isExpired ? 'Ended' : joinedMeets.includes(meet.id.toString()) ? 'Joined' : 'Join'}
@@ -566,12 +682,56 @@ export default function MeetPage() {
                         )}
                     </div>
                 ) : (
-                    // Map View Placeholder (Keep existing)
-                    <div className="h-[60vh] bg-gray-900 rounded-2xl flex flex-col items-center justify-center text-gray-500 border border-gray-800 relative overflow-hidden">
-                        <MapPin size={48} className="text-gray-800 mb-2" />
-                        <span className="text-sm">Map View Integration Coming Soon</span>
-                        <div className="absolute top-1/3 left-1/4 w-8 h-8 rounded-full bg-neon-green/20 border border-neon-green flex items-center justify-center text-xs animate-bounce">🏃</div>
-                        <div className="absolute bottom-1/3 right-1/4 w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500 flex items-center justify-center text-xs animate-pulse delay-75">⚽</div>
+                    <div className="rounded-2xl overflow-hidden border border-gray-800 relative">
+                        {isLoaded ? (
+                            <GoogleMap
+                                mapContainerStyle={MAP_CONTAINER_STYLE}
+                                center={myLocation || { lat: 37.5665, lng: 126.9780 }} // Default Seoul
+                                zoom={13}
+                                onLoad={onLoad}
+                                onUnmount={onUnmount}
+                                options={MAP_OPTIONS}
+                            >
+                                {/* User Location */}
+                                {myLocation && (
+                                    <Marker
+                                        position={myLocation}
+                                        icon={{
+                                            path: google.maps.SymbolPath.CIRCLE,
+                                            scale: 8,
+                                            fillColor: "#4285F4",
+                                            fillOpacity: 1,
+                                            strokeColor: "white",
+                                            strokeWeight: 2,
+                                        }}
+                                        title="You are here"
+                                    />
+                                )}
+
+                                {/* Meetups */}
+                                {filteredMeets.map(meet => (
+                                    <Marker
+                                        key={meet.id}
+                                        position={{ lat: meet.latitude, lng: meet.longitude }}
+                                        icon={{
+                                            path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+                                            fillColor: "#39FF14", // Neon Green
+                                            fillOpacity: 1,
+                                            strokeWeight: 1,
+                                            strokeColor: "#000000",
+                                            scale: 1.5,
+                                            anchor: new google.maps.Point(12, 24)
+                                        }}
+                                        onClick={() => window.location.href = `/meet/${meet.id}`}
+                                        title={meet.title}
+                                    />
+                                ))}
+                            </GoogleMap>
+                        ) : (
+                            <div className="h-[60vh] bg-gray-900 flex items-center justify-center">
+                                Loading Map...
+                            </div>
+                        )}
                     </div>
                 )}
             </main>
