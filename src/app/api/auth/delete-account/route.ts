@@ -34,6 +34,26 @@ export async function POST() {
         return NextResponse.json({ error: 'Configuration Error: Invalid Service Role Key format. It should be a JWT starting with "eyJ".' }, { status: 500 });
     }
 
+    // Deep Inspection: Decode JWT to check role
+    try {
+        const payloadBase64 = serviceRoleKey.split('.')[1];
+        if (payloadBase64) {
+            // Fix padding for base64 decode if necessary (Node handle it)
+            const decodedJson = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'));
+            console.log('Service Key Role Claim:', decodedJson.role);
+
+            if (decodedJson.role !== 'service_role') {
+                console.error(`Configuration Error: Key has role '${decodedJson.role}', expected 'service_role'`);
+                return NextResponse.json({
+                    error: `Configuration Error: The key you provided is for the '${decodedJson.role}' role. You MUST use the 'service_role' key (Secret) from Supabase settings.`
+                }, { status: 500 });
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to parse Service Key JWT for inspection', e);
+        // Continue, assuming it might be valid but we just couldn't parse it loosely
+    }
+
     const adminSupabase = createAdminClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceRoleKey,
