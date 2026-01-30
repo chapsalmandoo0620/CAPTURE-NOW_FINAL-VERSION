@@ -162,9 +162,7 @@ export default function LoginPage() {
 
 
 
-                    // ... (existing imports)
 
-                    // ... inside component ...
 
                     <div className="space-y-3">
                         <GoogleSignInButton onClick={() => handleSocialLogin('google')} />

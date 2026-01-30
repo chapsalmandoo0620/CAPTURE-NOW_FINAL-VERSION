@@ -25,7 +25,7 @@ export const GoogleSignInButton = ({ onClick }: SocialButtonProps) => {
                     <path fill="none" d="M0 0h48v48H0z"></path>
                 </svg>
             </div>
-            <span className="text-gray-600 font-medium text-sm">Sign in with Google</span>
+            <span className="text-gray-600 font-bold text-sm">Sign in with Google</span>
         </button>
     );
 };
@@ -47,7 +47,7 @@ export const KakaoSignInButton = ({ onClick }: SocialButtonProps) => {
                     <path d="M12 2C6.48 2 2 5.58 2 10C2 12.03 3.01 13.84 4.67 15.18C4.54 15.68 4.13 17.51 4 18C3.95 18.25 4.22 18.39 4.41 18.26C5.22 17.67 8.32 15.49 8.84 15.13C9.84 15.24 10.89 15.3 12 15.3C17.52 15.3 22 11.72 22 7.3C22 2.88 17.52 2 12 2Z" />
                 </svg>
             </div>
-            <span className="text-black font-medium text-sm text-opacity-85">Sign in with Kakao</span>
+            <span className="text-black font-bold text-sm text-opacity-85">Sign in with Kakao</span>
         </button>
     );
 };
