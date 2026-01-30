@@ -259,19 +259,104 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
         }
     };
 
-    const handleSendMessage = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!message.trim()) return;
+    // Realtime Chat Subscription & Fetch
+    useEffect(() => {
+        if (!id) return;
+        const supabase = createClient();
 
-        const newMsg = {
-            id: Date.now(),
-            user: 'Me',
-            text: message,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        // A. Initial Fetch
+        const fetchMessages = async () => {
+            const { data, error } = await supabase
+                .from('meetup_messages')
+                .select(`
+                    id,
+                    content,
+                    created_at,
+                    sender:users!sender_id(id, nickname, avatar_url)
+                `)
+                .eq('meetup_id', id)
+                .order('created_at', { ascending: true });
+
+            if (!error && data) {
+                const formatted = data.map((m: any) => ({
+                    id: m.id,
+                    user: m.sender?.id === myProfile?.id ? 'Me' : m.sender?.nickname || 'Unknown',
+                    userId: m.sender?.id, // Store ID for stable strict checks
+                    text: m.content,
+                    time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    avatar: m.sender?.avatar_url
+                }));
+                setChatMessages(formatted);
+            }
         };
 
-        setChatMessages([...chatMessages, newMsg]);
+        fetchMessages();
+
+        // B. Realtime Subscription
+        const channel = supabase
+            .channel(`meetup_chat_${id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'meetup_messages',
+                    filter: `meetup_id=eq.${id}`
+                },
+                async (payload) => {
+                    const newMsg = payload.new as any;
+                    // Fetch sender info for the new message
+                    const { data: senderData } = await supabase
+                        .from('users')
+                        .select('id, nickname, avatar_url')
+                        .eq('id', newMsg.sender_id)
+                        .single();
+
+                    const formattedMsg = {
+                        id: newMsg.id,
+                        user: senderData?.id === myProfile?.id ? 'Me' : senderData?.nickname || 'Unknown',
+                        userId: senderData?.id,
+                        text: newMsg.content,
+                        time: new Date(newMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        avatar: senderData?.avatar_url
+                    };
+
+                    setChatMessages((prev) => [...prev, formattedMsg]);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [id, myProfile?.id]); // Re-run if myProfile loads late
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!message.trim() || !myProfile) return;
+
+        const supabase = createClient();
+
+        // Optimistic UI Update (Optional, but let's wait for Realtime to be safe/simple first, or strict optimistic)
+        // We'll rely on Realtime for consistency unless latency is high.
+        // Actually, for better UX, let's just clear input.
+
+        const msgText = message;
         setMessage('');
+
+        const { error } = await supabase
+            .from('meetup_messages')
+            .insert({
+                meetup_id: id,
+                sender_id: myProfile.id,
+                content: msgText
+            });
+
+        if (error) {
+            console.error('Send message failed:', error);
+            alert('Failed to send message.');
+            setMessage(msgText); // Revert on fail
+        }
     };
 
     const handleFeedbackSubmit = async (rating: number, starName: string | null, mannerName: string | null) => {
