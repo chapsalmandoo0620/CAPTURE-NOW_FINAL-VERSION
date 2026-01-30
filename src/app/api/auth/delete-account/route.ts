@@ -12,8 +12,16 @@ export async function POST() {
     }
 
     // 2. Init Admin Client (Service Role)
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    let serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    let anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+    // Sanitize
+    serviceRoleKey = serviceRoleKey.trim();
+    anonKey = anonKey.trim();
+
+    // Debugging (Safe Log)
+    console.log(`[DeleteAccount] Using Service Key: ${serviceRoleKey.substring(0, 10)}...`);
+    console.log(`[DeleteAccount] Using Anon Key: ${anonKey.substring(0, 10)}...`);
 
     if (!serviceRoleKey) {
         console.error('Missing SUPABASE_SERVICE_ROLE_KEY');
@@ -21,6 +29,7 @@ export async function POST() {
     }
 
     // Safety Check: Did user copy the Anon key by mistake?
+    // We check both exact match and simplistic length match if they are suspiciously similar
     if (serviceRoleKey === anonKey) {
         console.error('Configuration Error: SUPABASE_SERVICE_ROLE_KEY is same as ANON_KEY');
         return NextResponse.json({
@@ -28,30 +37,28 @@ export async function POST() {
         }, { status: 500 });
     }
 
-    // Basic Format Check
-    if (!serviceRoleKey.startsWith('eyJ')) {
-        console.error('Configuration Error: SUPABASE_SERVICE_ROLE_KEY format invalid');
-        return NextResponse.json({ error: 'Configuration Error: Invalid Service Role Key format. It should be a JWT starting with "eyJ".' }, { status: 500 });
-    }
-
     // Deep Inspection: Decode JWT to check role
     try {
         const payloadBase64 = serviceRoleKey.split('.')[1];
-        if (payloadBase64) {
-            // Fix padding for base64 decode if necessary (Node handle it)
-            const decodedJson = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'));
-            console.log('Service Key Role Claim:', decodedJson.role);
-
-            if (decodedJson.role !== 'service_role') {
-                console.error(`Configuration Error: Key has role '${decodedJson.role}', expected 'service_role'`);
-                return NextResponse.json({
-                    error: `Configuration Error: The key you provided is for the '${decodedJson.role}' role. You MUST use the 'service_role' key (Secret) from Supabase settings.`
-                }, { status: 500 });
-            }
+        if (!payloadBase64) {
+            throw new Error('Invalid JWT format (no payload)');
         }
-    } catch (e) {
-        console.warn('Failed to parse Service Key JWT for inspection', e);
-        // Continue, assuming it might be valid but we just couldn't parse it loosely
+
+        const decodedJson = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'));
+        console.log('[DeleteAccount] Service Key Role Claim:', decodedJson.role);
+
+        if (decodedJson.role !== 'service_role') {
+            console.error(`Configuration Error: Key has role '${decodedJson.role}', expected 'service_role'`);
+            return NextResponse.json({
+                error: `Configuration Error: The key you provided is for the '${decodedJson.role}' role. You MUST use the 'service_role' key (Secret) from Supabase settings.`
+            }, { status: 500 });
+        }
+    } catch (e: any) {
+        console.error('Failed to parse Service Key JWT:', e);
+        return NextResponse.json({
+            error: 'Configuration Error: Invalid Service Role Key format. Could not parse JWT.',
+            details: e.message
+        }, { status: 500 });
     }
 
     const adminSupabase = createAdminClient(
