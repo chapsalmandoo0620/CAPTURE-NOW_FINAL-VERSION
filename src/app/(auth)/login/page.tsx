@@ -159,13 +159,15 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <button onClick={() => handleSocialLogin('google')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-gray-800 transition-colors">
-                            <span className="text-sm font-bold">Google</span>
-                        </button>
-                        <button onClick={() => handleSocialLogin('kakao')} className="flex items-center justify-center py-2.5 border border-gray-700 rounded-lg hover:bg-[#FEE500] hover:text-black hover:border-[#FEE500] transition-colors">
-                            <span className="text-sm font-bold">Kakao</span>
-                        </button>
+                    import {GoogleSignInButton, KakaoSignInButton} from '@/components/social-login-buttons';
+
+                    // ... (existing imports)
+
+                    // ... inside component ...
+
+                    <div className="space-y-3">
+                        <GoogleSignInButton onClick={() => handleSocialLogin('google')} />
+                        <KakaoSignInButton onClick={() => handleSocialLogin('kakao')} />
                     </div>
                 </div>
 
