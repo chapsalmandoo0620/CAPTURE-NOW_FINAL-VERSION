@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, CircuitBoard } from 'lucide-react';
+import { GoogleSignInButton, KakaoSignInButton } from '@/components/social-login-buttons';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -159,7 +160,7 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    import {GoogleSignInButton, KakaoSignInButton} from '@/components/social-login-buttons';
+
 
                     // ... (existing imports)
 

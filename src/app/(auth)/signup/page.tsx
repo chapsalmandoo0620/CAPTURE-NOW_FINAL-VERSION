@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Mail, Lock } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { GoogleSignInButton, KakaoSignInButton } from '@/components/social-login-buttons';
 import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
@@ -128,7 +129,7 @@ export default function SignupPage() {
                         </div>
                     </div>
 
-                    import {GoogleSignInButton, KakaoSignInButton} from '@/components/social-login-buttons';
+
 
                     // ... (existing imports)
 
