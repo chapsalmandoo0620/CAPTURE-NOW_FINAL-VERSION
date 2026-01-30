@@ -113,12 +113,10 @@ export default function SignupPage() {
                                 />
                             </div>
                         </div>
-
                         <button type="submit" disabled={loading} className="btn-neon w-full mt-2 disabled:opacity-50">
                             {loading ? 'Creating...' : 'Create Account'}
                         </button>
                     </form>
-
                     {/* Social Login */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
@@ -131,9 +129,7 @@ export default function SignupPage() {
 
 
 
-                    // ... (existing imports)
 
-                    // ... inside component ...
 
                     <div className="space-y-3">
                         <GoogleSignInButton onClick={() => handleSocialLogin('google')} />
