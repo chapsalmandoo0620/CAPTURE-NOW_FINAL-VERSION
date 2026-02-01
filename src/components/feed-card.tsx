@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, MessageSquare, Send, MoreHorizontal, Edit, Trash2, X, Check } from 'lucide-react';
+import { Heart, MessageSquare, Send, MoreHorizontal, Edit, Trash2, X, Check, Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Post {
@@ -29,6 +29,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
 }) {
     const supabase = createClient();
     const [liked, setLiked] = useState(false);
+    const [bookmarked, setBookmarked] = useState(false);
     const [likeCount, setLikeCount] = useState(post.likes || 0);
     const [showComments, setShowComments] = useState(false);
     const [showOptions, setShowOptions] = useState(false);
@@ -39,10 +40,10 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
     const [isEditing, setIsEditing] = useState(false);
     const [editCaption, setEditCaption] = useState(post.caption);
 
-    // 1. Fetch Interaction Data (Likes & Comments)
+    // 1. Fetch Interaction Data (Likes & Comments & Bookmarks)
     useEffect(() => {
         const fetchInteractions = async () => {
-            // Check if Liked
+            // Check if Liked & Bookmarked
             if (currentUser) {
                 const { data: likeData } = await supabase
                     .from('post_likes')
@@ -50,6 +51,13 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                     .match({ user_id: currentUser.id, post_id: post.id })
                     .single();
                 if (likeData) setLiked(true);
+
+                const { data: bookmarkData } = await supabase
+                    .from('bookmarks')
+                    .select('*')
+                    .match({ user_id: currentUser.id, post_id: post.id })
+                    .single();
+                if (bookmarkData) setBookmarked(true);
             }
 
             // Get Real Like Count
@@ -104,6 +112,31 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                 alert(`Failed to remove like: ${error.message}`);
                 setLiked(originalLiked);
                 setLikeCount(originalCount);
+            }
+        }
+    };
+
+    const toggleBookmark = async () => {
+        if (!currentUser) return alert('Please login to bookmark.');
+
+        const originalBookmarked = bookmarked;
+        setBookmarked(!bookmarked);
+
+        if (!originalBookmarked) {
+            // Add Bookmark
+            const { error } = await supabase.from('bookmarks').insert({ user_id: currentUser.id, post_id: post.id });
+            if (error) {
+                console.error('Bookmark Error:', error);
+                alert(`Failed to bookmark: ${error.message}`);
+                setBookmarked(originalBookmarked);
+            }
+        } else {
+            // Remove Bookmark
+            const { error } = await supabase.from('bookmarks').delete().match({ user_id: currentUser.id, post_id: post.id });
+            if (error) {
+                console.error('Unbookmark Error:', error);
+                alert(`Failed to remove bookmark: ${error.message}`);
+                setBookmarked(originalBookmarked);
             }
         }
     };
@@ -254,6 +287,9 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                             <Send size={26} className="text-white hover:text-gray-300 transition-colors" />
                         </button>
                     </div>
+                    <button onClick={toggleBookmark} className="hover:scale-110 transition-transform active:scale-95">
+                        <Bookmark size={26} className={`transition-colors ${bookmarked ? 'fill-white text-white' : 'text-white hover:text-gray-300'}`} />
+                    </button>
                 </div>
 
                 <div className="font-bold text-sm px-1">{likeCount.toLocaleString()} likes</div>

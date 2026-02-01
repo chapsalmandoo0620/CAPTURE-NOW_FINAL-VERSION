@@ -1,7 +1,5 @@
-'use client';
-
 import { useRouter } from 'next/navigation';
-import { ChevronRight, LogOut, User, Bell, Shield, HelpCircle, FileText } from 'lucide-react';
+import { ChevronRight, LogOut, User, Bell, Shield, HelpCircle, FileText, Bookmark, History, Megaphone, ShieldCheck } from 'lucide-react';
 
 import { createClient } from '@/lib/supabase/client';
 
@@ -41,12 +39,16 @@ export default function MenuPage() {
         }
     };
 
-    const MENU_ITEMS = [
-        { label: 'Edit Profile', icon: User, href: '/profile/edit' },
+    const ACTIVITY_ITEMS = [
+        { label: 'Bookmarks', icon: Bookmark, href: '/menu/bookmarks' },
+        { label: 'Meeting History', icon: History, href: '/menu/history' },
+    ];
+
+    const INFO_ITEMS = [
+        { label: 'Announcements', icon: Megaphone, href: '/menu/notice' },
+        { label: 'Terms of Service', icon: FileText, href: '/menu/terms' },
+        { label: 'Privacy Policy', icon: ShieldCheck, href: '/menu/privacy' },
         { label: 'Notifications', icon: Bell, href: '/notifications' },
-        { label: 'Privacy & Security', icon: Shield, href: '/privacy' },
-        { label: 'Help & Support', icon: HelpCircle, href: '/support' },
-        { label: 'Terms of Service', icon: FileText, href: '/terms' },
     ];
 
     return (
@@ -58,14 +60,15 @@ export default function MenuPage() {
 
             <main className="p-4 space-y-6">
 
-                {/* Account Section */}
+                {/* My Activity Section */}
                 <div className="space-y-2">
-                    <h2 className="text-xs font-bold text-gray-500 uppercase ml-1">Account</h2>
+                    <h2 className="text-xs font-bold text-gray-500 uppercase ml-1">My Activity</h2>
                     <div className="bg-gray-900/50 rounded-2xl overflow-hidden border border-gray-800">
-                        {MENU_ITEMS.slice(0, 3).map((item, i) => (
+                        {ACTIVITY_ITEMS.map((item, i) => (
                             <button
                                 key={item.label}
-                                className={`w-full flex items-center justify-between p-4 hover:bg-gray-800 transition-colors ${i !== 2 ? 'border-b border-gray-800' : ''}`}
+                                onClick={() => router.push(item.href)}
+                                className={`w-full flex items-center justify-between p-4 hover:bg-gray-800 transition-colors ${i !== ACTIVITY_ITEMS.length - 1 ? 'border-b border-gray-800' : ''}`}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400">
@@ -79,14 +82,15 @@ export default function MenuPage() {
                     </div>
                 </div>
 
-                {/* Support Section */}
+                {/* App Info Section */}
                 <div className="space-y-2">
-                    <h2 className="text-xs font-bold text-gray-500 uppercase ml-1">Support</h2>
+                    <h2 className="text-xs font-bold text-gray-500 uppercase ml-1">App Info</h2>
                     <div className="bg-gray-900/50 rounded-2xl overflow-hidden border border-gray-800">
-                        {MENU_ITEMS.slice(3).map((item, i) => (
+                        {INFO_ITEMS.map((item, i) => (
                             <button
                                 key={item.label}
-                                className={`w-full flex items-center justify-between p-4 hover:bg-gray-800 transition-colors ${i !== 1 ? 'border-b border-gray-800' : ''}`}
+                                onClick={() => router.push(item.href)}
+                                className={`w-full flex items-center justify-between p-4 hover:bg-gray-800 transition-colors ${i !== INFO_ITEMS.length - 1 ? 'border-b border-gray-800' : ''}`}
                             >
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400">
@@ -100,7 +104,7 @@ export default function MenuPage() {
                     </div>
                 </div>
 
-                {/* Danger Zone */}
+                {/* Account Actions */}
                 <div className="mt-8 space-y-3">
                     <button
                         onClick={handleLogout}
@@ -119,7 +123,7 @@ export default function MenuPage() {
                     </button>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center pt-4">
                     <p className="text-[10px] text-gray-600">
                         CAPTURE NOW v1.0.0<br />
                         Powered by Antigravity
