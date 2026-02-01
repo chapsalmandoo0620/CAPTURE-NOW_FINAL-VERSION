@@ -47,7 +47,7 @@ export default function MenuPage() {
     ];
 
     const INFO_ITEMS = [
-        { label: 'Tutorial', icon: CirclePlay, href: '/tutorial' },
+        { label: 'Tutorial', icon: BookOpen, href: '/tutorial' },
         { label: 'Announcements', icon: Megaphone, href: '/menu/notice' },
         { label: 'Terms of Service', icon: FileText, href: '/menu/terms' },
         { label: 'Privacy Policy', icon: ShieldCheck, href: '/menu/privacy' },
