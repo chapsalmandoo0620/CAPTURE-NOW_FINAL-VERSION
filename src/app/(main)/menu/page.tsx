@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 import { ChevronRight, LogOut, User, Bell, Shield, HelpCircle, FileText, Bookmark, History, Megaphone, ShieldCheck } from 'lucide-react';
 
