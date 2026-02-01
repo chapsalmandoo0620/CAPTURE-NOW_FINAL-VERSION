@@ -416,6 +416,15 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
         router.push('/meet');
     };
 
+    const handleFeedbackSkip = async () => {
+        // Host skips feedback but still ends the meetup
+        const supabase = createClient();
+        await supabase.from('meetups').update({ status: 'finished' }).eq('id', id);
+
+        setShowFeedbackModal(false);
+        router.push('/meet');
+    };
+
     if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>;
     if (!meetData) return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
@@ -676,6 +685,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                     meetupTitle={meetData.title}
                     participants={meetData.participants}
                     onSubmit={handleFeedbackSubmit}
+                    onSkip={handleFeedbackSkip}
                 />
             </main >
         </div >

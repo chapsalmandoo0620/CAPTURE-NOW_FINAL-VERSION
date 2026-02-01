@@ -9,9 +9,10 @@ interface FeedbackModalProps {
     meetupTitle: string;
     participants: { name: string; avatar?: string }[];
     onSubmit: (rating: number, starPlayer: string, mannerPlayer: string) => void;
+    onSkip?: () => void;
 }
 
-export default function MeetupFeedbackModal({ isOpen, onClose, meetupTitle, participants, onSubmit }: FeedbackModalProps) {
+export default function MeetupFeedbackModal({ isOpen, onClose, meetupTitle, participants, onSubmit, onSkip }: FeedbackModalProps) {
     const [rating, setRating] = useState(0);
     const [starPlayer, setStarPlayer] = useState<string | null>(null);
     const [mannerPlayer, setMannerPlayer] = useState<string | null>(null);
@@ -78,8 +79,8 @@ export default function MeetupFeedbackModal({ isOpen, onClose, meetupTitle, part
                                     key={i}
                                     onClick={() => setStarPlayer(p.name)}
                                     className={`p-2 rounded-xl border flex flex-col items-center gap-2 transition-all ${starPlayer === p.name
-                                            ? 'bg-yellow-400/20 border-yellow-400'
-                                            : 'bg-gray-800 border-gray-700 hover:border-gray-500'
+                                        ? 'bg-yellow-400/20 border-yellow-400'
+                                        : 'bg-gray-800 border-gray-700 hover:border-gray-500'
                                         }`}
                                 >
                                     <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden">
@@ -106,8 +107,8 @@ export default function MeetupFeedbackModal({ isOpen, onClose, meetupTitle, part
                                     key={i}
                                     onClick={() => setMannerPlayer(p.name)}
                                     className={`p-2 rounded-xl border flex flex-col items-center gap-2 transition-all ${mannerPlayer === p.name
-                                            ? 'bg-neon-green/20 border-neon-green'
-                                            : 'bg-gray-800 border-gray-700 hover:border-gray-500'
+                                        ? 'bg-neon-green/20 border-neon-green'
+                                        : 'bg-gray-800 border-gray-700 hover:border-gray-500'
                                         }`}
                                 >
                                     <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden">
@@ -126,7 +127,7 @@ export default function MeetupFeedbackModal({ isOpen, onClose, meetupTitle, part
                 {/* Footer Actions */}
                 <div className="p-5 border-t border-gray-800 flex gap-3 bg-gray-900">
                     <button
-                        onClick={onClose}
+                        onClick={onSkip || onClose}
                         className="flex-1 py-3 rounded-xl border border-gray-700 text-gray-400 font-bold text-sm hover:bg-gray-800"
                     >
                         Skip

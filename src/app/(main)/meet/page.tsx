@@ -280,6 +280,29 @@ export default function MeetPage() {
         setPendingFeedbackMeet(null);
     };
 
+    const handleFeedbackSkip = async () => {
+        if (!pendingFeedbackMeet) return;
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Insert skipped record (Rating 0) to prevent re-prompting
+        const { error } = await supabase.from('meetup_feedback').insert({
+            meetup_id: pendingFeedbackMeet.id,
+            reviewer_id: user.id,
+            rating: 0,
+            star_player_id: null,
+            manner_player_id: null
+        });
+
+        if (error) {
+            console.error("Skip feedback error:", error);
+        }
+
+        setShowFeedbackModal(false);
+        setPendingFeedbackMeet(null);
+    };
+
     useEffect(() => {
         const loadMeets = async () => {
             const supabase = createClient();
@@ -767,6 +790,7 @@ export default function MeetPage() {
                     meetupTitle={pendingFeedbackMeet.title}
                     participants={pendingFeedbackMeet.participants}
                     onSubmit={handleFeedbackSubmit}
+                    onSkip={handleFeedbackSkip}
                 />
             )}
         </div>
