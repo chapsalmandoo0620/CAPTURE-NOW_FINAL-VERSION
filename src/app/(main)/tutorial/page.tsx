@@ -1,9 +1,10 @@
 'use client';
 
+import React, { Suspense } from 'react';
 import TutorialOverlay from '@/components/tutorial-overlay';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function TutorialPage() {
+function TutorialContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const isNewUser = searchParams.get('new') === 'true';
@@ -12,6 +13,10 @@ export default function TutorialPage() {
         router.push('/');
     };
 
+    return <TutorialOverlay onComplete={handleComplete} isNewUser={isNewUser} />;
+}
+
+export default function TutorialPage() {
     return (
         <div className="relative min-h-screen bg-black">
             {/* Background (Blurred version of Feed or just simple brand background) */}
@@ -20,7 +25,9 @@ export default function TutorialPage() {
                 <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black"></div>
             </div>
 
-            <TutorialOverlay onComplete={handleComplete} isNewUser={isNewUser} />
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-neon-green">Loading...</div>}>
+                <TutorialContent />
+            </Suspense>
         </div>
     );
 }
