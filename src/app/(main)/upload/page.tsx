@@ -11,36 +11,7 @@ export default function UploadPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const cameraInputRef = useRef<HTMLInputElement>(null);
 
-    // ... (rest of the code)
-
-    // ...
-
-    <input
-        type="file"
-        accept="image/*,video/*"
-        className="hidden"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-    />
-
-    {/* Camera Input (Hidden) */ }
-    <input
-        type="file"
-        accept="image/*,video/*"
-        capture="environment"
-        className="hidden"
-        ref={cameraInputRef}
-        onChange={handleFileSelect}
-    />
-
-    {/* Camera Button */ }
-    <button
-        onClick={() => cameraInputRef.current?.click()}
-        className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-900 border border-gray-800 text-gray-400 font-bold hover:bg-gray-800"
-    >
-        <Camera size={20} />
-        Open Camera
-    </button>
+    // UI State
     const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
     const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
     const [caption, setCaption] = useState('');
@@ -167,8 +138,21 @@ export default function UploadPage() {
                             onChange={handleFileSelect}
                         />
 
-                        {/* Camera Button (Mock) */}
-                        <button className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-900 border border-gray-800 text-gray-400 font-bold hover:bg-gray-800">
+                        {/* Camera Input (Hidden) */}
+                        <input
+                            type="file"
+                            accept="image/*,video/*"
+                            capture="environment"
+                            className="hidden"
+                            ref={cameraInputRef}
+                            onChange={handleFileSelect}
+                        />
+
+                        {/* Camera Button */}
+                        <button
+                            onClick={() => cameraInputRef.current?.click()}
+                            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-900 border border-gray-800 text-gray-400 font-bold hover:bg-gray-800"
+                        >
                             <Camera size={20} />
                             Open Camera
                         </button>
