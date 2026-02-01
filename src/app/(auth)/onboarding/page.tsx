@@ -119,7 +119,7 @@ export default function OnboardingPage() {
             localStorage.setItem('capture_now_auth', 'true');
 
             alert('Profile Setup Complete!');
-            router.push('/');
+            router.push('/tutorial?new=true');
 
         } catch (err: any) {
             console.error("Critical Error during save:", err);
