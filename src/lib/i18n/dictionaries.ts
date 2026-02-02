@@ -27,6 +27,28 @@ export const dictionaries: Record<Locale, any> = {
             profile: "Profile",
             menu: "Menu"
         },
+        auth: {
+            login: {
+                title: "Sign In",
+                email: "Email",
+                password: "Password",
+                signingIn: "Signing in...",
+                signIn: "Sign In",
+                or: "Or continue with",
+                google: "Continue with Google",
+                kakao: "Continue with Kakao",
+                noAccount: "Don't have an account? Sign up"
+            },
+            signup: {
+                title: "Create Account",
+                email: "Email",
+                password: "Password",
+                creating: "Creating account...",
+                createAccount: "Create Account",
+                hasAccount: "Already have an account? Sign in",
+                success: "Account created! Please sign in."
+            }
+        },
         home: {
             upcomingNearby: "Upcoming Nearby",
             seeAll: "See all",
@@ -329,6 +351,28 @@ export const dictionaries: Record<Locale, any> = {
             upload: "업로드",
             profile: "프로필",
             menu: "메뉴"
+        },
+        auth: {
+            login: {
+                title: "로그인",
+                email: "이메일",
+                password: "비밀번호",
+                signingIn: "로그인 중...",
+                signIn: "로그인",
+                or: "또는",
+                google: "Google로 계속하기",
+                kakao: "Kakao로 계속하기",
+                noAccount: "계정이 없으신가요? 회원가입"
+            },
+            signup: {
+                title: "회원가입",
+                email: "이메일",
+                password: "비밀번호",
+                creating: "계정 생성 중...",
+                createAccount: "회원가입",
+                hasAccount: "이미 계정이 있으신가요? 로그인",
+                success: "계정이 생성되었습니다! 로그인해주세요."
+            }
         },
         home: {
             upcomingNearby: "내 주변 모임",
@@ -633,6 +677,28 @@ export const dictionaries: Record<Locale, any> = {
             profile: "プロフィール",
             menu: "メニュー"
         },
+        auth: {
+            login: {
+                title: "ログイン",
+                email: "メールアドレス",
+                password: "パスワード",
+                signingIn: "ログイン中...",
+                signIn: "ログイン",
+                or: "または",
+                google: "Googleで続ける",
+                kakao: "Kakaoで続ける",
+                noAccount: "アカウントをお持ちでないですか？登録"
+            },
+            signup: {
+                title: "アカウント作成",
+                email: "メールアドレス",
+                password: "パスワード",
+                creating: "作成中...",
+                createAccount: "アカウント作成",
+                hasAccount: "すでにアカウントをお持ちですか？ログイン",
+                success: "アカウントが作成されました！ログインしてください。"
+            }
+        },
         home: {
             upcomingNearby: "近くの集まり",
             seeAll: "すべて見る",
@@ -855,28 +921,7 @@ export const dictionaries: Record<Locale, any> = {
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
         },
-        auth: {
-            login: {
-                title: "お帰りなさい。",
-                email: "メールアドレス",
-                password: "パスワード",
-                signIn: "ログイン",
-                signingIn: "ログイン中...",
-                noAccount: "アカウントをお持ちでないですか？ 作成",
-                or: "または",
-                google: "Googleで続ける",
-                kakao: "Kakaoで続ける",
-            },
-            signup: {
-                title: "今すぐコミュニティに参加しよう。",
-                email: "メールアドレス",
-                password: "パスワード",
-                createAccount: "アカウント作成",
-                creating: "作成中...",
-                hasAccount: "すでにアカウントをお持ちですか？ ログイン",
-                success: "アカウントが作成されました！ プロフィール設定のためにログインしてください。"
-            }
-        },
+
         onboarding: {
             step1: {
                 title: "プロフィール設定",
@@ -935,6 +980,28 @@ export const dictionaries: Record<Locale, any> = {
             upload: "发布",
             profile: "我的",
             menu: "菜单"
+        },
+        auth: {
+            login: {
+                title: "登录",
+                email: "邮箱",
+                password: "密码",
+                signingIn: "登录中...",
+                signIn: "登录",
+                or: "或",
+                google: "使用Google继续",
+                kakao: "使用Kakao继续",
+                noAccount: "没有账号？注册"
+            },
+            signup: {
+                title: "创建账号",
+                email: "邮箱",
+                password: "密码",
+                creating: "创建中...",
+                createAccount: "创建账号",
+                hasAccount: "已有账号？登录",
+                success: "账号已创建！请登录。"
+            }
         },
         home: {
             upcomingNearby: "附近聚会",
