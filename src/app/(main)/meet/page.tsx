@@ -380,7 +380,11 @@ export default function MeetPage() {
                 });
 
                 // Sorting Logic
-                // Priority: Hosted & Expired -> Hosted by Me -> Joined by Me -> Start Time Ascending
+                // Priority:
+                // 1. My Actionable (Hosted & Expired) - Needs 'End Meetup' -> TOP
+                // 2. My Active (Hosted OR Joined) - Upcoming for me
+                // 3. Other Active - Upcoming for others (sorted by time)
+                // 4. Expired (Stale) - Finished/Past but not closed -> BOTTOM
                 formatted.sort((a, b) => {
                     const now = new Date();
                     const aExpired = a.rawEndTime && new Date(a.rawEndTime) < now;
@@ -388,20 +392,29 @@ export default function MeetPage() {
 
                     const aHosted = a.hostId === myId;
                     const bHosted = b.hostId === myId;
+                    const aJoined = currentJoined.includes(a.id);
+                    const bJoined = currentJoined.includes(b.id);
 
-                    // 1. Hosted & Expired (Top Priority)
+                    const aIsMine = aHosted || aJoined;
+                    const bIsMine = bHosted || bJoined;
+
+                    // 1. Hosted & Expired (Top Priority - Action Item)
                     if (aHosted && aExpired && !(bHosted && bExpired)) return -1;
                     if (!(aHosted && aExpired) && (bHosted && bExpired)) return 1;
 
-                    // 2. Hosted by Me
-                    if (aHosted && !bHosted) return -1;
-                    if (!aHosted && bHosted) return 1;
+                    // 2. Active vs Expired (General)
+                    // If A is Active and B is Expired, A comes first.
+                    // (Exception: My Hosted Expired is already handled above)
+                    if (!aExpired && bExpired) return -1;
+                    if (aExpired && !bExpired) return 1;
 
-                    const aJoined = currentJoined.includes(a.id);
-                    const bJoined = currentJoined.includes(b.id);
-                    if (aJoined && !bJoined) return -1;
-                    if (!aJoined && bJoined) return 1;
+                    // 3. My Games (Among Active/Same Status Group)
+                    if (aIsMine && !bIsMine) return -1;
+                    if (!aIsMine && bIsMine) return 1;
 
+                    // 4. Time Sort (Ascending - Earliest first)
+                    // For Active: Earliest -> Next up.
+                    // For Expired: Earliest -> Longest ago (Deep bottom).
                     return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
                 });
 
