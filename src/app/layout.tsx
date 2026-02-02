@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: "CAPTURE NOW | Sports Highlights & Meetups",
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased min-h-screen">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
