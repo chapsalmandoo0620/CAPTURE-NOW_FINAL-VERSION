@@ -156,104 +156,104 @@ export const dictionaries: Record<Locale, any> = {
                 joined: "Joined"
             },
             emptyJoined: "You haven't joined any sessions yet.",
-            findSession: "Find a Session",
-            notifications: {
-                title: "Notifications",
-                empty: "No notifications yet.",
-                justNow: "Just now",
-                types: {
-                    like: "New Like",
-                    comment: "New Comment",
-                    reminder: "Reminder",
-                    feedback: "Meeting Ended"
-                },
-                messages: {
-                    liked: "liked your post.",
-                    commented: "commented:",
-                    feedbackReq: "has ended. Please leave feedback!",
-                    getReady: "Get ready for"
-                }
-            },
-            meetupDetail: {
-                hostedBy: "Hosted by",
-                distance: "Distance",
-                joining: "Joining",
-                aboutSession: "About Session",
-                location: "Location",
-                chat: "Chat",
-                active: "Active",
-                sessionEnded: "Session Ended",
-                chatDisabled: "Session Ended - Chat Disabled",
-                joinSession: "Join Session",
-                leaveSession: "Leave Session",
-                endMeetup: "End Meetup & Request Feedback",
-                feedbackWait: "Ending the meetup will notify all participants to provide feedback.",
-                loading: "Loading...",
-                notFound: "Session not found",
-                goBack: "Go Back",
-                typeMessage: "Type a message...",
-                noMessages: "No messages yet. Say hi!",
-                joinToChat: "Join session to chat with members",
-                loadingMap: "Loading Map...",
-                noMap: "No map location provided"
+            findSession: "Find a Session"
+        },
+        notifications: {
+            title: "Notifications",
+            empty: "No notifications yet.",
+            justNow: "Just now",
+            types: {
+                like: "New Like",
+                comment: "New Comment",
+                reminder: "Reminder",
+                feedback: "Meeting Ended"
             },
             messages: {
-                title: "Messages",
-                searchPlaceholder: "Search messages...",
-                noMessages: "No messages yet.",
-                newMessage: "New Message",
-                following: "Following",
-                noFollowing: "You aren't following anyone yet.",
-                you: "You"
+                liked: "liked your post.",
+                commented: "commented:",
+                feedbackReq: "has ended. Please leave feedback!",
+                getReady: "Get ready for"
+            }
+        },
+        meetupDetail: {
+            hostedBy: "Hosted by",
+            distance: "Distance",
+            joining: "Joining",
+            aboutSession: "About Session",
+            location: "Location",
+            chat: "Chat",
+            active: "Active",
+            sessionEnded: "Session Ended",
+            chatDisabled: "Session Ended - Chat Disabled",
+            joinSession: "Join Session",
+            leaveSession: "Leave Session",
+            endMeetup: "End Meetup & Request Feedback",
+            feedbackWait: "Ending the meetup will notify all participants to provide feedback.",
+            loading: "Loading...",
+            notFound: "Session not found",
+            goBack: "Go Back",
+            typeMessage: "Type a message...",
+            noMessages: "No messages yet. Say hi!",
+            joinToChat: "Join session to chat with members",
+            loadingMap: "Loading Map...",
+            noMap: "No map location provided"
+        },
+        messages: {
+            title: "Messages",
+            searchPlaceholder: "Search messages...",
+            noMessages: "No messages yet.",
+            newMessage: "New Message",
+            following: "Following",
+            noFollowing: "You aren't following anyone yet.",
+            you: "You"
+        },
+        feed: {
+            noComments: "No comments yet.",
+            addComment: "Add a comment...",
+            postBtn: "Post",
+            deleteConfirm: "Are you sure you want to delete this post?",
+        },
+        tutorial: {
+            step1: {
+                title: "Welcome to",
+                titleAccent: "CAPTURE NOW",
+                desc: "Your ultimate playground for sports highlights and joining 'Lightning' meetups.",
             },
-            feed: {
-                noComments: "No comments yet.",
-                addComment: "Add a comment...",
-                postBtn: "Post",
-                deleteConfirm: "Are you sure you want to delete this post?",
+            step2: {
+                title: "Feed & Interactions",
+                desc: "Scroll to explore moments from the community. Engage with others using:",
+                like: "Like",
+                comment: "Comment",
+                save: "Save",
             },
-            tutorial: {
-                step1: {
-                    title: "Welcome to",
-                    titleAccent: "CAPTURE NOW",
-                    desc: "Your ultimate playground for sports highlights and joining 'Lightning' meetups.",
-                },
-                step2: {
-                    title: "Feed & Interactions",
-                    desc: "Scroll to explore moments from the community. Engage with others using:",
-                    like: "Like",
-                    comment: "Comment",
-                    save: "Save",
-                },
-                step3: {
-                    title: "Share Your Moments",
-                    desc: "Got a great shot? Tap the (+) button at the bottom center to upload photos or videos.",
-                    action: "Tap to Upload",
-                },
-                step4: {
-                    title: "Join the Action",
-                    desc: "Find 'Lightning' meetups nearby. Filter by Sport (⚽🏀), Distance, or Time.",
-                    soccer: "Soccer",
-                    hoops: "Hoops",
-                    nearMe: "Near Me",
-                    today: "Today",
-                },
-                step5: {
-                    title: "Host a Meetup",
-                    desc: "Want to lead? Tap (+) in the Meet tab. Set location, time, and gather your squad.",
-                    create: "Create Meetup",
-                },
-                step6: {
-                    title: "Menu & Tracking",
-                    desc: "Check 'My Activity' for bookmarks and history. Stay updated with announcements.",
-                    history: "History",
-                    saved: "Saved",
-                },
-                stepMock: {
-                    park: "Han River Park",
-                    time: "Fri, 7:00 PM",
-                }
+            step3: {
+                title: "Share Your Moments",
+                desc: "Got a great shot? Tap the (+) button at the bottom center to upload photos or videos.",
+                action: "Tap to Upload",
             },
+            step4: {
+                title: "Join the Action",
+                desc: "Find 'Lightning' meetups nearby. Filter by Sport (⚽🏀), Distance, or Time.",
+                soccer: "Soccer",
+                hoops: "Hoops",
+                nearMe: "Near Me",
+                today: "Today",
+            },
+            step5: {
+                title: "Host a Meetup",
+                desc: "Want to lead? Tap (+) in the Meet tab. Set location, time, and gather your squad.",
+                create: "Create Meetup",
+            },
+            step6: {
+                title: "Menu & Tracking",
+                desc: "Check 'My Activity' for bookmarks and history. Stay updated with announcements.",
+                history: "History",
+                saved: "Saved",
+            },
+            stepMock: {
+                park: "Han River Park",
+                time: "Fri, 7:00 PM",
+            }
         },
         menu: {
             title: "Menu",
@@ -460,104 +460,104 @@ export const dictionaries: Record<Locale, any> = {
                 joined: "참여내역"
             },
             emptyJoined: "아직 참여한 모임이 없습니다.",
-            findSession: "모임 찾기",
-            notifications: {
-                title: "알림",
-                empty: "아직 알림이 없습니다.",
-                justNow: "방금 전",
-                types: {
-                    like: "새로운 좋아요",
-                    comment: "새로운 댓글",
-                    reminder: "모임 알림",
-                    feedback: "모임 종료"
-                },
-                messages: {
-                    liked: "님이 회원님의 게시물을 좋아합니다.",
-                    commented: "님이 댓글을 남겼습니다:",
-                    feedbackReq: "모임이 종료되었습니다. 피드백을 남겨주세요!",
-                    getReady: "모임 준비하세요:"
-                }
-            },
-            meetupDetail: {
-                hostedBy: "호스트:",
-                distance: "거리",
-                joining: "참여 중",
-                aboutSession: "모임 소개",
-                location: "위치",
-                chat: "채팅",
-                active: "활동 중",
-                sessionEnded: "모임 종료",
-                chatDisabled: "모임 종료 - 채팅 불가",
-                joinSession: "참여하기",
-                leaveSession: "나가기",
-                endMeetup: "모임 종료 및 피드백 요청",
-                feedbackWait: "모임을 종료하면 모든 참여자에게 피드백 요청이 전송됩니다.",
-                loading: "로딩 중...",
-                notFound: "모임을 찾을 수 없습니다",
-                goBack: "뒤로 가기",
-                typeMessage: "메시지 입력...",
-                noMessages: "메시지가 없습니다. 인사를 건네보세요!",
-                joinToChat: "모임에 참여하여 대화를 나눠보세요",
-                loadingMap: "지도 로딩 중...",
-                noMap: "위치 정보가 없습니다"
+            findSession: "모임 찾기"
+        },
+        notifications: {
+            title: "알림",
+            empty: "아직 알림이 없습니다.",
+            justNow: "방금 전",
+            types: {
+                like: "새로운 좋아요",
+                comment: "새로운 댓글",
+                reminder: "모임 알림",
+                feedback: "모임 종료"
             },
             messages: {
-                title: "메시지",
-                searchPlaceholder: "메시지 검색...",
-                noMessages: "메시지가 없습니다.",
-                newMessage: "새 메시지",
-                following: "팔로잉",
-                noFollowing: "아직 팔로우 중인 사용자가 없습니다.",
-                you: "나"
+                liked: "님이 회원님의 게시물을 좋아합니다.",
+                commented: "님이 댓글을 남겼습니다:",
+                feedbackReq: "모임이 종료되었습니다. 피드백을 남겨주세요!",
+                getReady: "모임 준비하세요:"
+            }
+        },
+        meetupDetail: {
+            hostedBy: "호스트:",
+            distance: "거리",
+            joining: "참여 중",
+            aboutSession: "모임 소개",
+            location: "위치",
+            chat: "채팅",
+            active: "활동 중",
+            sessionEnded: "모임 종료",
+            chatDisabled: "모임 종료 - 채팅 불가",
+            joinSession: "참여하기",
+            leaveSession: "나가기",
+            endMeetup: "모임 종료 및 피드백 요청",
+            feedbackWait: "모임을 종료하면 모든 참여자에게 피드백 요청이 전송됩니다.",
+            loading: "로딩 중...",
+            notFound: "모임을 찾을 수 없습니다",
+            goBack: "뒤로 가기",
+            typeMessage: "메시지 입력...",
+            noMessages: "메시지가 없습니다. 인사를 건네보세요!",
+            joinToChat: "모임에 참여하여 대화를 나눠보세요",
+            loadingMap: "지도 로딩 중...",
+            noMap: "위치 정보가 없습니다"
+        },
+        messages: {
+            title: "메시지",
+            searchPlaceholder: "메시지 검색...",
+            noMessages: "메시지가 없습니다.",
+            newMessage: "새 메시지",
+            following: "팔로잉",
+            noFollowing: "아직 팔로우 중인 사용자가 없습니다.",
+            you: "나"
+        },
+        feed: {
+            noComments: "댓글이 없습니다.",
+            addComment: "댓글 달기...",
+            postBtn: "게시",
+            deleteConfirm: "정말 이 게시물을 삭제하시겠습니까?",
+        },
+        tutorial: {
+            step1: {
+                title: "환영합니다",
+                titleAccent: "CAPTURE NOW",
+                desc: "스포츠 하이라이트 공유와 번개 모임을 위한 최고의 놀이터에 오신 것을 환영합니다.",
             },
-            feed: {
-                noComments: "댓글이 없습니다.",
-                addComment: "댓글 달기...",
-                postBtn: "게시",
-                deleteConfirm: "정말 이 게시물을 삭제하시겠습니까?",
+            step2: {
+                title: "피드 & 소통",
+                desc: "커뮤니티의 멋진 순간들을 구경하세요. 좋아요, 댓글, 저장으로 소통해보세요.",
+                like: "좋아요",
+                comment: "댓글",
+                save: "저장",
             },
-            tutorial: {
-                step1: {
-                    title: "환영합니다",
-                    titleAccent: "CAPTURE NOW",
-                    desc: "스포츠 하이라이트 공유와 번개 모임을 위한 최고의 놀이터에 오신 것을 환영합니다.",
-                },
-                step2: {
-                    title: "피드 & 소통",
-                    desc: "커뮤니티의 멋진 순간들을 구경하세요. 좋아요, 댓글, 저장으로 소통해보세요.",
-                    like: "좋아요",
-                    comment: "댓글",
-                    save: "저장",
-                },
-                step3: {
-                    title: "순간을 공유하세요",
-                    desc: "멋진 장면을 포착했나요? 하단 중앙의 (+) 버튼을 눌러 사진이나 영상을 업로드하세요.",
-                    action: "업로드하기",
-                },
-                step4: {
-                    title: "모임 참여하기",
-                    desc: "내 주변 '번개' 모임을 찾아보세요. 종목(⚽🏀), 거리, 시간으로 필터링할 수 있습니다.",
-                    soccer: "축구",
-                    hoops: "농구",
-                    nearMe: "내 주변",
-                    today: "오늘",
-                },
-                step5: {
-                    title: "모임 주최하기",
-                    desc: "리더가 되고 싶나요? 모임 탭의 (+)를 눌러보세요. 장소와 시간을 정하고 멤버를 모으세요.",
-                    create: "모임 만들기",
-                },
-                step6: {
-                    title: "메뉴 & 활동 기록",
-                    desc: "'내 활동'에서 북마크와 모임 참여 기록을 확인하세요. 공지사항도 놓치지 마세요.",
-                    history: "기록",
-                    saved: "저장됨",
-                },
-                stepMock: {
-                    park: "한강 공원",
-                    time: "금요일 오후 7:00",
-                }
+            step3: {
+                title: "순간을 공유하세요",
+                desc: "멋진 장면을 포착했나요? 하단 중앙의 (+) 버튼을 눌러 사진이나 영상을 업로드하세요.",
+                action: "업로드하기",
             },
+            step4: {
+                title: "모임 참여하기",
+                desc: "내 주변 '번개' 모임을 찾아보세요. 종목(⚽🏀), 거리, 시간으로 필터링할 수 있습니다.",
+                soccer: "축구",
+                hoops: "농구",
+                nearMe: "내 주변",
+                today: "오늘",
+            },
+            step5: {
+                title: "모임 주최하기",
+                desc: "리더가 되고 싶나요? 모임 탭의 (+)를 눌러보세요. 장소와 시간을 정하고 멤버를 모으세요.",
+                create: "모임 만들기",
+            },
+            step6: {
+                title: "메뉴 & 활동 기록",
+                desc: "'내 활동'에서 북마크와 모임 참여 기록을 확인하세요. 공지사항도 놓치지 마세요.",
+                history: "기록",
+                saved: "저장됨",
+            },
+            stepMock: {
+                park: "한강 공원",
+                time: "금요일 오후 7:00",
+            }
         },
         menu: {
             title: "메뉴",
@@ -764,24 +764,24 @@ export const dictionaries: Record<Locale, any> = {
                 joined: "参加履歴"
             },
             emptyJoined: "まだ参加した集まりがありません。",
-            findSession: "集まりを探す",
-            notifications: {
-                title: "通知",
-                empty: "まだ通知はありません。",
-                justNow: "たった今",
-                types: {
-                    like: "新しい「いいね！」",
-                    comment: "新しいコメント",
-                    reminder: "リマインダー",
-                    feedback: "ミーティング終了"
-                },
-                messages: {
-                    liked: "さんがあなたの投稿に「いいね！」しました。",
-                    commented: "さんがコメントしました:",
-                    feedbackReq: "が終了しました。フィードバックを残してください！",
-                    getReady: "の準備をしましょう！"
-                }
+            findSession: "集まりを探す"
+        },
+        notifications: {
+            title: "通知",
+            empty: "まだ通知はありません。",
+            justNow: "たった今",
+            types: {
+                like: "新しい「いいね！」",
+                comment: "新しいコメント",
+                reminder: "リマインダー",
+                feedback: "ミーティング終了"
             },
+            messages: {
+                liked: "さんがあなたの投稿に「いいね！」しました。",
+                commented: "さんがコメントしました:",
+                feedbackReq: "が終了しました。フィードバックを残してください！",
+                getReady: "の準備をしましょう！"
+            }
         },
         meetupDetail: {
             hostedBy: "主催:",
