@@ -5,38 +5,39 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, Bell, Heart, MessageSquare, Clock, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 interface NotificationItem {
     id: string;
     type: 'like' | 'comment' | 'reminder' | 'feedback';
     title: string;
-    message: string;
+    message: React.ReactNode;
     time: string;
     timestamp: number;
     link: string;
     read: boolean;
 }
 
-// Time Helper
-function getTimeAgo(isoString: string) {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return 'Just now';
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return date.toLocaleDateString();
-}
-
 export default function NotificationsPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].common;
+    const tNotif = dictionaries[language].notifications;
+
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const formatTime = (isoString: string) => {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+        if (diff < 60) return tNotif.justNow;
+        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+        return `${Math.floor(diff / 86400)}d`;
+    };
 
     const getIcon = (type: string) => {
         switch (type) {
@@ -108,10 +109,10 @@ export default function NotificationsPage() {
                     feedbackNotifs.push({
                         id: `feedback-${m.id}`,
                         type: 'feedback',
-                        title: 'Meeting Ended',
-                        message: `${m.title} has ended. Please leave feedback!`,
+                        title: tNotif.types.feedback,
+                        message: <span><span className="font-bold text-white">{m.title}</span> {tNotif.messages.feedbackReq}</span>,
                         timestamp: new Date(m.end_time || now).getTime(),
-                        time: getTimeAgo(m.end_time || now.toISOString()),
+                        time: formatTime(m.end_time || now.toISOString()),
                         link: `/meet/${m.id}`,
                         read: false
                     });
@@ -152,10 +153,10 @@ export default function NotificationsPage() {
                             allNotifs.push({
                                 id: `like-${like.post_id}-${like.created_at}`,
                                 type: 'like',
-                                title: 'New Like',
-                                message: `${(like.user as any)?.nickname || 'Someone'} liked your post.`,
+                                title: tNotif.types.like,
+                                message: <span><span className="font-bold text-white">{(like.user as any)?.nickname || 'Someone'}</span> {tNotif.messages.liked}</span>,
                                 timestamp: new Date(like.created_at).getTime(),
-                                time: getTimeAgo(like.created_at),
+                                time: formatTime(like.created_at),
                                 link: `/profile`,
                                 read: false
                             });
@@ -176,10 +177,10 @@ export default function NotificationsPage() {
                             allNotifs.push({
                                 id: `comment-${c.post_id}-${c.created_at}`,
                                 type: 'comment',
-                                title: 'New Comment',
-                                message: `${(c.user as any)?.nickname || 'Someone'} commented: "${c.text}"`,
+                                title: tNotif.types.comment,
+                                message: <span><span className="font-bold text-white">{(c.user as any)?.nickname || 'Someone'}</span> {tNotif.messages.commented} <span className="text-gray-400">"{c.text}"</span></span>,
                                 timestamp: new Date(c.created_at).getTime(),
-                                time: getTimeAgo(c.created_at),
+                                time: formatTime(c.created_at),
                                 link: `/profile`,
                                 read: false
                             });
@@ -234,13 +235,13 @@ export default function NotificationsPage() {
                 </button>
                 <div className="flex items-center gap-2">
                     <Bell className="text-neon-green" size={20} />
-                    <h1 className="font-bold text-lg">Notifications</h1>
+                    <h1 className="font-bold text-lg">{tNotif.title}</h1>
                 </div>
             </header>
 
             <main className="p-4 space-y-2 min-h-[60vh]">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Loading...</div>
+                    <div className="p-8 text-center text-gray-500">{t.loading}</div>
                 ) : notifications.length > 0 ? (
                     notifications.map((notif) => (
                         <Link href={notif.link} key={notif.id}>
@@ -264,7 +265,7 @@ export default function NotificationsPage() {
                         <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
                             <Bell className="text-gray-700" size={32} />
                         </div>
-                        <p>No notifications yet.</p>
+                        <p>{tNotif.empty}</p>
                     </div>
                 )}
             </main>

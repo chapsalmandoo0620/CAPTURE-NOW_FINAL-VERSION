@@ -5,9 +5,22 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, History, MapPin, ChevronRight, CalendarCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 export default function HistoryPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].common;
+    const tMenu = dictionaries[language].menu;
+    const tFeed = dictionaries[language].feed;
+    const tMeetup = dictionaries[language].meetup;
+    const tHome = dictionaries[language].home;
+    const tTutorial = dictionaries[language].tutorial;
+
+    // Fallback for missing keys if any (partial dictionaries)
+    // Using explicit strings from earlier analysis to map to dictionary keys
+
     const [meetups, setMeetups] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState<any>(null);
@@ -50,7 +63,7 @@ export default function HistoryPage() {
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) throw new Error("Invalid Date");
             return {
-                month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
+                month: date.toLocaleString(language === 'en' ? 'en-US' : (language === 'ko' ? 'ko-KR' : (language === 'ja' ? 'ja-JP' : 'zh-CN')), { month: 'short' }).toUpperCase(),
                 day: date.getDate().toString()
             };
         } catch (e) {
@@ -67,13 +80,13 @@ export default function HistoryPage() {
                 </button>
                 <div className="flex items-center gap-2">
                     <History className="text-neon-green" size={20} />
-                    <h1 className="font-bold text-lg">Meeting History</h1>
+                    <h1 className="font-bold text-lg">{tMenu.history}</h1>
                 </div>
             </header>
 
             <main className="p-4 space-y-3 min-h-[60vh]">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Loading...</div>
+                    <div className="p-8 text-center text-gray-500">{t.loading}</div>
                 ) : meetups.length > 0 ? (
                     meetups.map((meet) => {
                         const { month, day } = formatDate(meet.start_time);
@@ -93,7 +106,7 @@ export default function HistoryPage() {
                                                 {isHost && <span className="text-[10px] text-neon-green border border-neon-green px-1 rounded">HOST</span>}
                                             </h3>
                                             <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.location_name || 'Unknown'}</span>
+                                                <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.location_name || t.search}</span>
                                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-600"></span>
                                                 <span>{meet.category}</span>
                                             </div>
@@ -112,8 +125,8 @@ export default function HistoryPage() {
                         <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
                             <CalendarCheck className="text-gray-700" size={32} />
                         </div>
-                        <p>No history yet.<br />Join meetups to see them here.</p>
-                        <Link href="/meet" className="text-neon-green font-bold text-sm underline">Find Meetups</Link>
+                        <p>{tTutorial.step6.desc}</p>
+                        <Link href="/meet" className="text-neon-green font-bold text-sm underline">{tHome.upcomingNearby}</Link>
                     </div>
                 )}
             </main>

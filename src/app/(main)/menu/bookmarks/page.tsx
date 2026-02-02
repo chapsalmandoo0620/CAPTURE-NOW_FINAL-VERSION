@@ -5,9 +5,17 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeft, X, Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import FeedCard from '@/components/feed-card';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 export default function BookmarksPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].common;
+    const tMenu = dictionaries[language].menu;
+    const tHome = dictionaries[language].home;
+    const tProfile = dictionaries[language].profile;
+
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedPost, setSelectedPost] = useState<any>(null);
@@ -46,13 +54,13 @@ export default function BookmarksPage() {
                         return {
                             id: p.id,
                             userId: p.user_id,
-                            user: author?.nickname || 'Unknown',
+                            user: author?.nickname || t.search || 'Unknown',
                             userImg: author?.avatar_url || '',
                             image: p.media_url,
                             type: (p.media_url.match(/\.(mp4|webm|mov)$/i) || p.category === 'video') ? 'video' : 'image',
                             likes: 0, // Ideally fetch real likes count
                             caption: p.caption,
-                            location: p.location_name || 'Unknown',
+                            location: p.location_name || t.search || 'Unknown',
                             sport: p.category || 'General',
                             level: 'Any',
                             time: new Date(p.created_at).toLocaleDateString()
@@ -83,13 +91,13 @@ export default function BookmarksPage() {
                 </button>
                 <div className="flex items-center gap-2">
                     <Bookmark className="text-neon-green fill-neon-green" size={20} />
-                    <h1 className="font-bold text-lg">Bookmarks</h1>
+                    <h1 className="font-bold text-lg">{tMenu.bookmarks}</h1>
                 </div>
             </header>
 
             <main className="min-h-[60vh]">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Loading...</div>
+                    <div className="p-8 text-center text-gray-500">{t.loading}</div>
                 ) : posts.length > 0 ? (
                     <div className="grid grid-cols-3 gap-0.5">
                         {posts.map((post, i) => (
@@ -113,7 +121,7 @@ export default function BookmarksPage() {
                         <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center">
                             <Bookmark className="text-gray-700" size={32} />
                         </div>
-                        <p>No bookmarks yet.<br />Save moments to see them here.</p>
+                        <p>{tProfile.noBookmarks || "No bookmarks yet."}</p>
                     </div>
                 )}
             </main>

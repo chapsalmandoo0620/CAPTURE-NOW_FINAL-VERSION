@@ -3,6 +3,8 @@
 import React, { Suspense } from 'react';
 import TutorialOverlay from '@/components/tutorial-overlay';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 function TutorialContent() {
     const router = useRouter();
@@ -17,6 +19,9 @@ function TutorialContent() {
 }
 
 export default function TutorialPage() {
+    const { language } = useLanguage();
+    const t = dictionaries[language].common;
+
     return (
         <div className="relative min-h-screen bg-black">
             {/* Background (Blurred version of Feed or just simple brand background) */}
@@ -25,7 +30,7 @@ export default function TutorialPage() {
                 <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black"></div>
             </div>
 
-            <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-neon-green">Loading...</div>}>
+            <Suspense fallback={<div className="flex items-center justify-center min-h-screen text-neon-green">{t.loading}</div>}>
                 <TutorialContent />
             </Suspense>
         </div>
