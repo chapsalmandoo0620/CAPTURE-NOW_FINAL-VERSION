@@ -656,23 +656,13 @@ export default function MeetPage() {
                                         <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-bl-full -mr-10 -mt-10 blur-xl"></div>
                                     )}
 
-                                    <div className="flex justify-between items-start mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-neon-green uppercase tracking-wide border border-gray-700">
-                                                {displaySport}
-                                            </span>
-                                            {meet.status === 'Closing Soon' && (
-                                                <span className="text-[10px] font-bold text-red-500 animate-pulse">{t('meetup.card.closingSoon')}</span>
-                                            )}
-                                            {isHost && (
-                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neon-green text-black uppercase tracking-wide">
-                                                    {t('meetup.card.mySession')}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <div className="bg-gray-800 rounded-lg px-2 py-1 border border-gray-700 flex flex-col items-center">
-                                                <span className="text-[10px] text-gray-400 uppercase">{t('home.join')}</span>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h3 className="text-xl font-bold leading-snug group-hover:text-neon-green transition-colors pr-2 break-all line-clamp-2">
+                                            {meet.title}
+                                        </h3>
+                                        <div className="flex flex-col items-end shrink-0 ml-2">
+                                            <div className="bg-gray-800 rounded-lg px-2.5 py-1.5 border border-gray-700 flex flex-col items-center min-w-[60px]">
+                                                <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{t('home.join')}</span>
                                                 <span className={`font-bold text-sm ${(Array.isArray(meet.participants) ? meet.participants.length : meet.participants) >= meet.max ? 'text-red-500' : 'text-neon-green'}`}>
                                                     {Array.isArray(meet.participants) ? meet.participants.length : meet.participants}/{meet.max}
                                                 </span>
@@ -680,13 +670,23 @@ export default function MeetPage() {
                                         </div>
                                     </div>
 
-                                    <h3 className="text-lg font-bold mb-1 leading-tight group-hover:text-neon-green transition-colors">{meet.title}</h3>
-
-                                    <div className="flex gap-2 mb-3">
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 bg-gray-800/50">
+                                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-neon-green uppercase tracking-wide border border-gray-700">
+                                            {displaySport}
+                                        </span>
+                                        {meet.status === 'Closing Soon' && (
+                                            <span className="text-[10px] font-bold text-red-500 animate-pulse uppercase">{t('meetup.card.closingSoon')}</span>
+                                        )}
+                                        {isHost && (
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neon-green text-black uppercase tracking-wide">
+                                                {t('meetup.card.mySession')}
+                                            </span>
+                                        )}
+                                        <div className="w-px h-3 bg-gray-700 mx-1"></div>
+                                        <span className="text-[10px] text-gray-400">
                                             Lv: {displayLevel}
                                         </span>
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 bg-gray-800/50">
+                                        <span className="text-[10px] text-gray-400">
                                             {meet.vibe || 'Fun'}
                                         </span>
                                     </div>
