@@ -1225,28 +1225,7 @@ export const dictionaries: Record<Locale, any> = {
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
         },
-        auth: {
-            login: {
-                title: "欢迎回来。",
-                email: "邮箱",
-                password: "密码",
-                signIn: "登录",
-                signingIn: "登录中...",
-                noAccount: "还没有账号？ 注册",
-                or: "或通过以下方式继续",
-                google: "通过 Google 登录",
-                kakao: "通过 Kakao 登录",
-            },
-            signup: {
-                title: "立即加入我们。",
-                email: "邮箱",
-                password: "密码",
-                createAccount: "创建账号",
-                creating: "创建中...",
-                hasAccount: "已有账号？ 登录",
-                success: "账号创建成功！ 请登录以设置个人资料。"
-            }
-        },
+
         onboarding: {
             step1: {
                 title: "设置资料",
