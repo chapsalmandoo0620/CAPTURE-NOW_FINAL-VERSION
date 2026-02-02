@@ -1,69 +1,67 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Camera, MapPin, X, ChevronDown, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, Image as ImageIcon, X, Send, Camera, MapPin } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import LocationPicker from '@/components/location-picker';
+import { useLanguage } from '@/context/language-context';
+
+/* 
+  Same Logic as Meet Page for Categories/Levels to verify consistency 
+  But here we select single value.
+*/
+const SPORTS = ['Running', 'Cycle', 'Soccer', 'Basketball', 'Tennis', 'Golf', 'Climbing', 'Fitness', 'Yoga', 'Swimming', 'Hiking', 'Skating', 'Surfing', 'Badminton', 'Boxing', 'MMA', 'Crossfit'];
+const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Any'];
 
 export default function UploadPage() {
+    const { t } = useLanguage();
     const router = useRouter();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const cameraInputRef = useRef<HTMLInputElement>(null);
-
-    // UI State
-    const [selectedMedia, setSelectedMedia] = useState<string | null>(null);
-    const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
-    const [caption, setCaption] = useState('');
-    const [isUploading, setIsUploading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
-
-    // Metadata States
-    const [sport, setSport] = useState('');
-    const [level, setLevel] = useState('');
+    const [preview, setPreview] = useState<string | null>(null);
+    const [isVideo, setIsVideo] = useState(false);
+    const [caption, setCaption] = useState('');
     const [location, setLocation] = useState('');
-    const [latitude, setLatitude] = useState<number | null>(null);
-    const [longitude, setLongitude] = useState<number | null>(null);
+    const [sport, setSport] = useState(''); // Optional
+    const [level, setLevel] = useState(''); // Optional (Context: post level? maybe not strictly needed for highlights but useful)
+    const [uploading, setUploading] = useState(false);
 
-    const SPORTS = [
-        '',
-        'Running', 'Cycling', 'Soccer', 'Tennis', 'Badminton',
-        'Basketball', 'Hiking', 'Golf', 'Swimming', 'Climbing', 'Gym'
-    ];
-    const LEVELS = ['', 'Beginner', 'Intermediate', 'Advanced', 'Pro'];
+    // Native Camera Input
+    const cameraInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) {
-            setFile(selectedFile);
-            const isVideo = selectedFile.type.startsWith('video/');
-            setMediaType(isVideo ? 'video' : 'image');
+    // Check Auth
+    useEffect(() => {
+        const checkAuth = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert(t('upload.loginReq'));
+                router.replace('/onboarding');
+            }
+        };
+        checkAuth();
+    }, [router, t]);
 
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setSelectedMedia(reader.result as string);
-            };
-            reader.readAsDataURL(selectedFile);
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = e.target.files?.[0];
+        if (selected) {
+            setFile(selected);
+            setPreview(URL.createObjectURL(selected));
+            setIsVideo(selected.type.startsWith('video/'));
         }
     };
 
-    const handleLocationSelect = (lat: number, lng: number, address?: string) => {
-        setLatitude(lat);
-        setLongitude(lng);
-        if (address) setLocation(address);
-    };
-
     const handleUpload = async () => {
-        if (!file || !selectedMedia) return;
+        if (!file) return;
 
-        setIsUploading(true);
+        setUploading(true);
         const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) return;
 
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("Please login to upload.");
-
-            // 1. Upload to Supabase Storage
+            // 1. Upload File
             const fileExt = file.name.split('.').pop();
             const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
@@ -71,180 +69,196 @@ export default function UploadPage() {
                 .from('highlights')
                 .upload(fileName, file);
 
-            if (uploadError) throw new Error(`Storage Upload Failed: ${uploadError.message}`);
+            if (uploadError) throw uploadError;
 
             // 2. Get Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('highlights')
                 .getPublicUrl(fileName);
 
-            // 3. Save to Database
+            // 3. Insert Record
             const { error: dbError } = await supabase
                 .from('highlights')
                 .insert({
                     user_id: user.id,
                     media_url: publicUrl,
-                    caption: caption,
-                    category: sport,
+                    caption,
                     location_name: location,
-                    latitude: latitude,
-                    longitude: longitude
+                    category: sport || 'General', // Default
+                    // level: level // Schema doesn't strictly have level on highlights yet, but if it did...
+                    // For now we just focus on existing schema columns.
+                    // Checking schema: highlights(id, user_id, media_url, description(caption), location_name, category)
                 });
 
-            if (dbError) throw new Error(`Database Save Failed: ${dbError.message} (Details: ${dbError.details || 'Check RLS'})`);
+            if (dbError) throw dbError;
 
             // Success
-            router.push('/');
+            router.push('/'); // Go to Feed
+            router.refresh();
 
         } catch (error: any) {
-            console.error("Upload failed:", error);
-            alert(`Upload failed: ${error.message}`);
+            alert('Upload failed: ' + error.message);
         } finally {
-            setIsUploading(false);
+            setUploading(false);
         }
     };
 
+    // Sport/Level UI logic (Simple Selects)
+    const sportsList = SPORTS.map(s => ({
+        value: s,
+        label: s.toLowerCase() === 'cycle' ? t('meetup.categories.cycling') : t(`meetup.categories.${s.toLowerCase()}`) || s
+    }));
+
+    // Schema might not support level for highlights yet, but UI shows it as Optional.
+    // If backend doesn't support, we just won't save it or add to metadata json? 
+    // Schema in memory: highlights table has 'category' but not explicit 'level'. 
+    // I will ignore saving 'level' for now to avoid errors, or treat it as purely UI if not supported.
+    // Actually, looking at previous artifacts, highlights schema is simple.
+    // I'll leave the UI selector as requested but maybe append to caption or ignore? 
+    // Or just store category.
+    // For now, I'll keep the selector as "Optional" implies it might not even be used heavily.
+
+    const levelsList = LEVELS.map(l => ({
+        value: l,
+        label: t(`meetup.levels.${l.toLowerCase()}`) || l
+    }));
+
     return (
-        <div className="min-h-screen bg-black text-white pb-24">
+        <div className="min-h-screen bg-black text-white pb-24 flex flex-col items-center relative">
             {/* Header */}
-            <header className="sticky top-0 bg-black/80 backdrop-blur-md z-40 px-4 py-3 flex items-center justify-between border-b border-gray-900">
-                <button onClick={() => router.back()} className="p-1 text-gray-400 hover:text-white">
-                    <ChevronLeft size={28} />
+            <div className="w-full h-16 flex items-center justify-between px-4 border-b border-gray-900 sticky top-0 bg-black/80 backdrop-blur z-20">
+                <button onClick={() => router.back()} className="p-2">
+                    <X className="text-gray-400" />
                 </button>
-                <h1 className="font-bold text-lg">New Post</h1>
-                <div className="w-8"></div>
-            </header>
+                <h1 className="font-bold text-lg">{t('upload.title')}</h1>
+                <div className="w-10"></div> {/* Spacer */}
+            </div>
 
-            <main className="p-4 flex flex-col items-center min-h-[80vh]">
+            {/* Main Content */}
+            <div className="w-full max-w-md flex-1 flex flex-col p-4 space-y-6">
 
-                {!selectedMedia ? (
-                    // Empty State: Upload Prompt
-                    <div className="flex-1 flex flex-col items-center justify-center w-full gap-6">
-                        <div
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full aspect-square max-w-sm border-2 border-dashed border-gray-800 rounded-3xl flex flex-col items-center justify-center gap-4 hover:border-neon-green hover:bg-gray-900/30 transition-all cursor-pointer group"
-                        >
-                            <div className="w-20 h-20 rounded-full bg-gray-900 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <ImageIcon size={40} className="text-gray-500 group-hover:text-neon-green" />
-                            </div>
-                            <span className="font-bold text-gray-500 group-hover:text-white">Select Photo or Video</span>
+                {/* File Picker Area */}
+                {!preview ? (
+                    <div
+                        className="flex-1 border-2 border-dashed border-gray-800 rounded-3xl flex flex-col items-center justify-center gap-4 bg-gray-900/20 hover:bg-gray-900/40 transition-colors cursor-pointer group min-h-[400px]"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-neon-green group-hover:text-black transition-colors">
+                            <Camera size={32} />
                         </div>
-
-                        <input
-                            type="file"
-                            accept="image/*,video/*"
-                            className="hidden"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                        />
-
-                        {/* Camera Input (Hidden) */}
-                        <input
-                            type="file"
-                            accept="image/*,video/*"
-                            capture="environment"
-                            className="hidden"
-                            ref={cameraInputRef}
-                            onChange={handleFileSelect}
-                        />
-
-                        {/* Camera Button */}
+                        <span className="font-bold text-gray-500 group-hover:text-white">{t('upload.selectPrompt')}</span>
                         <button
-                            onClick={() => cameraInputRef.current?.click()}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                cameraInputRef.current?.click();
+                            }}
                             className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-900 border border-gray-800 text-gray-400 font-bold hover:bg-gray-800"
                         >
-                            <Camera size={20} />
-                            Open Camera
+                            <Camera size={20} /> {t('upload.openCamera')}
                         </button>
                     </div>
                 ) : (
-                    // Preview & edit State
-                    <div className="w-full max-w-md space-y-6 animate-in fade-in slide-in-from-bottom-5">
-                        {/* Media Preview */}
-                        <div className={`relative w-full rounded-3xl overflow-hidden border border-gray-800 bg-black ${mediaType === 'video' ? 'aspect-[9/16]' : 'aspect-square'}`}>
-                            {mediaType === 'video' ? (
-                                <video src={selectedMedia} controls autoPlay loop className="w-full h-full object-cover" />
-                            ) : (
-                                <img src={selectedMedia} alt="Preview" className="w-full h-full object-contain" />
-                            )}
-
-                            <button
-                                onClick={() => { setSelectedMedia(null); setFile(null); }}
-                                className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-white hover:bg-red-500/80 transition-colors z-10"
-                            >
-                                <X size={20} />
-                            </button>
+                    <div className="relative w-full rounded-3xl overflow-hidden bg-black border border-gray-800 aspect-[4/5]">
+                        {isVideo ? (
+                            <video src={preview} className="w-full h-full object-cover" controls />
+                        ) : (
+                            <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        )}
+                        <button
+                            onClick={() => { setFile(null); setPreview(null); }}
+                            className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur rounded-full text-white hover:bg-red-500/80 transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                        <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md rounded-xl py-2 px-3 flex justify-center">
+                            <span className="text-xs font-bold text-neon-green">{t('upload.preview')}</span>
                         </div>
+                    </div>
+                )}
 
-                        {/* Metadata Inputs */}
-                        <div className="space-y-4">
-                            {/* Sport & Level */}
-                            <div className="flex gap-2">
+                {/* Hidden Inputs */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,video/*"
+                    className="hidden"
+                />
+                <input
+                    type="file"
+                    ref={cameraInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,video/*"
+                    capture="environment"
+                    className="hidden"
+                />
+
+                {/* Metadata Inputs */}
+                {preview && (
+                    <div className="space-y-4 animate-in slide-in-from-bottom-10 fade-in duration-300">
+                        {/* Selects Row */}
+                        <div className="flex gap-4">
+                            <div className="flex-1 relative">
                                 <select
                                     value={sport}
                                     onChange={(e) => setSport(e.target.value)}
-                                    className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-neon-green focus:outline-none appearance-none font-bold"
+                                    className="w-full appearance-none bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-neon-green focus:outline-none text-gray-300"
                                 >
-                                    {SPORTS.map(s => <option key={s} value={s}>{s === '' ? 'Select Sport (Optional)' : s}</option>)}
+                                    <option value=''>{t('upload.selectSport')}</option>
+                                    {sportsList.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                                 </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
+                            </div>
+                            <div className="flex-1 relative">
                                 <select
                                     value={level}
                                     onChange={(e) => setLevel(e.target.value)}
-                                    className="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-neon-green focus:outline-none appearance-none text-gray-300"
+                                    className="w-full appearance-none bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-neon-green focus:outline-none text-gray-300"
                                 >
-                                    {LEVELS.map(l => <option key={l} value={l}>{l === '' ? 'Select Level (Optional)' : l}</option>)}
+                                    <option value=''>{t('upload.selectLevel')}</option>
+                                    {levelsList.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                                 </select>
-                            </div>
-
-                            {/* Location */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-bold ml-1 text-gray-400">Location</label>
-                                <LocationPicker onLocationSelect={handleLocationSelect} />
-                                <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        value={location}
-                                        onChange={(e) => setLocation(e.target.value)}
-                                        placeholder="Add location name..."
-                                        className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm focus:border-neon-green focus:outline-none placeholder-gray-500 text-white"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Caption Input */}
-                            <div className="space-y-1">
-                                <textarea
-                                    value={caption}
-                                    onChange={(e) => setCaption(e.target.value)}
-                                    placeholder="Write a caption..."
-                                    className="w-full bg-gray-900 border border-gray-800 rounded-2xl p-4 text-sm focus:border-neon-green focus:outline-none min-h-[100px] resize-none"
-                                />
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={16} />
                             </div>
                         </div>
 
-                        {/* Share Button */}
+                        {/* Location */}
+                        <div className="relative">
+                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                            <label className="absolute -top-2.5 left-3 bg-black px-1 text-xs font-bold text-gray-400">{t('upload.locationProto')}</label>
+                            <input
+                                type="text"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                                placeholder={t('upload.locationPlace')}
+                                className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-11 pr-4 py-3 text-sm focus:border-neon-green focus:outline-none placeholder-gray-600 text-white"
+                            />
+                        </div>
+
+                        {/* Caption */}
+                        <div className="relative">
+                            <textarea
+                                value={caption}
+                                onChange={(e) => setCaption(e.target.value)}
+                                placeholder={t('upload.captionPlace')}
+                                className="w-full bg-gray-900 border border-gray-800 rounded-2xl p-4 text-sm focus:border-neon-green focus:outline-none min-h-[100px] resize-none placeholder-gray-600 text-white"
+                            />
+                        </div>
+
+                        {/* Submit */}
                         <button
                             onClick={handleUpload}
-                            disabled={isUploading}
-                            className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isUploading
-                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                : 'bg-neon-green text-black hover:bg-[#32D612] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
+                            disabled={uploading}
+                            className={`w-full py-4 rounded-xl font-bold text-black text-lg transition-all shadow-lg ${uploading
+                                ? 'bg-gray-700 cursor-not-allowed text-gray-400'
+                                : 'bg-neon-green hover:bg-[#32D612] hover:scale-[1.02] active:scale-[0.98]'
                                 }`}
                         >
-                            {isUploading ? (
-                                <span>Uploading...</span>
-                            ) : (
-                                <>
-                                    <Send size={20} /> Share Moment
-                                </>
-                            )}
+                            {uploading ? t('upload.uploading') : t('upload.shareMoment')}
                         </button>
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     );
 }

@@ -6,8 +6,10 @@ import FeedCard from '@/components/feed-card';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/language-context';
 
 export default function ProfilePage() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<'moments' | 'joined'>('moments');
     const [joinedMeets, setJoinedMeets] = useState<any[]>([]);
@@ -221,15 +223,15 @@ export default function ProfilePage() {
                         <div className="flex-1 flex justify-around text-center">
                             <div className="flex flex-col">
                                 <span className="font-bold text-xl">{user.stats.posts}</span>
-                                <span className="text-xs text-gray-500">Posts</span>
+                                <span className="text-xs text-gray-500">{t('profile.posts')}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-bold text-xl">{user.stats.followers}</span>
-                                <span className="text-xs text-gray-500">Followers</span>
+                                <span className="text-xs text-gray-500">{t('profile.followers')}</span>
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-bold text-xl">{followingCount}</span>
-                                <span className="text-xs text-gray-500">Following</span>
+                                <span className="text-xs text-gray-500">{t('profile.following')}</span>
                             </div>
                         </div>
                     </div>
@@ -249,7 +251,7 @@ export default function ProfilePage() {
                             <div className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 flex items-center gap-2 shrink-0">
                                 <ThumbsUp size={14} className="text-blue-500 fill-blue-500" />
                                 <div className="text-xs">
-                                    <span className="text-gray-400">Meeting Score</span>
+                                    <span className="text-gray-400">{t('profile.meetingScore')}</span>
                                     <span className="font-bold ml-1 text-white">{meetingScore}</span>
                                 </div>
                             </div>
@@ -257,14 +259,14 @@ export default function ProfilePage() {
                             <div className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 flex items-center gap-2">
                                 <Star size={14} className="text-yellow-500 fill-yellow-500" />
                                 <div className="text-xs">
-                                    <span className="text-gray-400">Star Player</span>
+                                    <span className="text-gray-400">{t('profile.starPlayer')}</span>
                                     <span className="font-bold ml-1 text-white">x{user.awards.starPlayer}</span>
                                 </div>
                             </div>
                             <div className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 flex items-center gap-2">
                                 <Award size={14} className="text-neon-green" />
                                 <div className="text-xs">
-                                    <span className="text-gray-400">Manner Player</span>
+                                    <span className="text-gray-400">{t('profile.mannerPlayer')}</span>
                                     <span className="font-bold ml-1 text-white">x{user.awards.mannerPlayer}</span>
                                 </div>
                             </div>
@@ -274,7 +276,7 @@ export default function ProfilePage() {
                         <div className="flex flex-wrap gap-2 pt-1">
                             {user.sports.map((sport: any, idx: number) => (
                                 <span key={idx} className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 border border-gray-700 font-medium">
-                                    {sport.name} <span className="text-neon-green ml-1">{sport.level}</span>
+                                    {t(`meetup.categories.${sport.name?.toLowerCase()}`) || sport.name} <span className="text-neon-green ml-1">{t(`meetup.levels.${sport.level?.toLowerCase()}`) || sport.level}</span>
                                 </span>
                             ))}
                             <span className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-400 border border-gray-700 italic">
@@ -289,16 +291,16 @@ export default function ProfilePage() {
                             onClick={() => router.push('/profile/edit')}
                             className="flex-1 bg-gray-900 border border-gray-800 rounded-xl py-2 text-sm font-bold hover:bg-gray-800 hover:border-gray-700 transition-colors"
                         >
-                            Edit Profile
+                            {t('profile.editProfile')}
                         </button>
                         <button
                             onClick={() => {
                                 navigator.clipboard.writeText(window.location.href);
-                                alert("Profile Link Copied to Clipboard!");
+                                alert(t('common.copyLink'));
                             }}
                             className="flex-1 bg-gray-900 border border-gray-800 rounded-xl py-2 text-sm font-bold hover:bg-gray-800 hover:border-gray-700 transition-colors"
                         >
-                            Share Profile
+                            {t('profile.shareProfile')}
                         </button>
                     </div>
                 </div>
@@ -344,6 +346,7 @@ export default function ProfilePage() {
                                 const { month, day } = formatDate(meet.date);
                                 const isHost = meet.hostId === currentUser?.id;
                                 const isExpired = meet.rawEndTime && new Date(meet.rawEndTime) < new Date();
+                                const displaySport = t(`meetup.categories.${meet.sport?.toLowerCase()}`) || meet.sport;
 
                                 return (
                                     <Link href={`/meet/${meet.id}`} key={meet.id}>
@@ -361,12 +364,12 @@ export default function ProfilePage() {
                                                 <div>
                                                     <h3 className="font-bold text-sm mb-0.5 group-hover:text-neon-green transition-colors flex items-center gap-2">
                                                         {meet.title}
-                                                        {isHost && isExpired && <span className="text-[10px] text-red-500 border border-red-500 px-1 rounded">Ended</span>}
+                                                        {isHost && isExpired && <span className="text-[10px] text-red-500 border border-red-500 px-1 rounded">{t('meetup.card.ended')}</span>}
                                                     </h3>
                                                     <div className="flex items-center gap-2 text-xs text-gray-400">
                                                         <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.loc}</span>
                                                         <span className="w-0.5 h-0.5 rounded-full bg-gray-600"></span>
-                                                        <span>{meet.sport}</span>
+                                                        <span>{displaySport}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -376,8 +379,8 @@ export default function ProfilePage() {
                                 );
                             }) : (
                                 <div className="text-center py-10 text-gray-500">
-                                    <p className="mb-2">You haven't joined any sessions yet.</p>
-                                    <Link href="/meet" className="text-neon-green text-sm font-bold hover:underline">Find a Session</Link>
+                                    <p className="mb-2">{t('profile.emptyJoined')}</p>
+                                    <Link href="/meet" className="text-neon-green text-sm font-bold hover:underline">{t('profile.findSession')}</Link>
                                 </div>
                             )}
                         </div>
@@ -396,7 +399,6 @@ export default function ProfilePage() {
                             <X size={20} />
                         </button>
 
-                        {/* Reusing FeedCard logic but slightly adapted styles if needed via prop */}
                         <FeedCard
                             post={selectedPost}
                             isModal={true}

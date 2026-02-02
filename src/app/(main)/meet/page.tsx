@@ -5,6 +5,7 @@ import { Search, Map as MapIcon, List, Filter, Calendar, MapPin, Plus, X, Chevro
 import { createClient } from '@/lib/supabase/client';
 import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { useLanguage } from '@/context/language-context';
 
 const MAP_CONTAINER_STYLE = {
     width: '100%',
@@ -105,7 +106,6 @@ const DISTANCES = ['< 1km', '1-3km', '3-5km', '5-10km', '10km+'];
 const libraries: ("places")[] = ["places"];
 
 // Haversine Formula for Distance
-// Haversine Formula for Distance
 function calculateDistanceValue(lat1: number, lon1: number, lat2: number, lon2: number) {
     if (!lat1 || !lon1 || !lat2 || !lon2) return -1;
     const R = 6371; // Earth radius in km
@@ -124,6 +124,7 @@ function formatDistance(d: number) {
 }
 
 export default function MeetPage() {
+    const { t } = useLanguage();
     // UI State
     const [view, setView] = useState<'list' | 'map'>('list');
     const [activeCategory, setActiveCategory] = useState('All');
@@ -450,7 +451,7 @@ export default function MeetPage() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            alert("Please login to join.");
+            alert(t('upload.loginReq'));
             return;
         }
 
@@ -484,11 +485,25 @@ export default function MeetPage() {
         }
     };
 
+    const categoriesList = CATEGORIES.map(cat => ({
+        value: cat,
+        label: cat.toLowerCase() === 'cycle' ? t('meetup.categories.cycling') : t(`meetup.categories.${cat.toLowerCase()}`) || cat
+    }));
+
+    const levelsList = LEVELS.map(lvl => ({
+        value: lvl,
+        label: t(`meetup.levels.${lvl.toLowerCase()}`) || lvl
+    }));
+
     return (
         <div className="min-h-screen bg-black text-white pb-24 relative">
-            {/* Header ... */}
+            {/* Header */}
             <header className="sticky top-0 bg-black/80 backdrop-blur-md z-40 px-4 py-3 space-y-3 border-b border-gray-900">
-                {/* ... (Keep existing Header code) ... */}
+
+                <div className="flex justify-between items-center">
+                    <h1 className="font-bold text-lg">{t('nav.meet')}</h1>
+                </div>
+
                 <div className="flex gap-2">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -496,7 +511,7 @@ export default function MeetPage() {
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Find sports nearby..."
+                            placeholder={t('common.search')}
                             className="w-full bg-gray-900 border border-gray-800 rounded-xl pl-10 pr-4 py-3 text-sm focus:border-neon-green focus:outline-none transition-colors"
                         />
                     </div>
@@ -516,28 +531,28 @@ export default function MeetPage() {
 
                 {/* Categories */}
                 <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
-                    {CATEGORIES.map(cat => (
+                    {categoriesList.map(item => (
                         <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === cat
+                            key={item.value}
+                            onClick={() => setActiveCategory(item.value)}
+                            className={`px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategory === item.value
                                 ? 'bg-neon-green text-black shadow-[0_0_10px_rgba(57,255,20,0.3)]'
                                 : 'bg-gray-900 text-gray-400 hover:bg-gray-800 hover:text-white'
                                 }`}
                         >
-                            {cat}
+                            {item.label}
                         </button>
                     ))}
                 </div>
             </header>
 
-            {/* Filter Modal ... (Keep existing Filter Modal) */}
+            {/* Filter Modal */}
             {showFilter && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-gray-900 w-full max-w-md rounded-3xl border border-gray-800 p-6 space-y-6 shadow-2xl relative">
-                        {/* ... Filter content ... */}
+                        {/* Title */}
                         <div className="flex justify-between items-center">
-                            <h3 className="text-xl font-bold flex items-center gap-2"><Filter size={20} className="text-neon-green" /> Filter Sessions</h3>
+                            <h3 className="text-xl font-bold flex items-center gap-2"><Filter size={20} className="text-neon-green" /> {t('meetup.filter.title')}</h3>
                             <button onClick={() => setShowFilter(false)} className="p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition-colors">
                                 <X size={20} className="text-gray-400" />
                             </button>
@@ -546,15 +561,15 @@ export default function MeetPage() {
                         <div className="space-y-4">
                             {/* Sport */}
                             <div className="space-y-2">
-                                <label className="text-xs text-gray-500 font-bold uppercase">Sport</label>
+                                <label className="text-xs text-gray-500 font-bold uppercase">{t('meetup.filter.sport')}</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {CATEGORIES.map(s => (
+                                    {categoriesList.map(s => (
                                         <button
-                                            key={s}
-                                            onClick={() => setFilterSport(s)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-bold border ${filterSport === s ? 'bg-neon-green text-black border-neon-green' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
+                                            key={s.value}
+                                            onClick={() => setFilterSport(s.value)}
+                                            className={`px-4 py-2 rounded-xl text-xs font-bold border ${filterSport === s.value ? 'bg-neon-green text-black border-neon-green' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
                                         >
-                                            {s}
+                                            {s.label}
                                         </button>
                                     ))}
                                 </div>
@@ -562,15 +577,15 @@ export default function MeetPage() {
 
                             {/* Level */}
                             <div className="space-y-2">
-                                <label className="text-xs text-gray-500 font-bold uppercase">Level</label>
+                                <label className="text-xs text-gray-500 font-bold uppercase">{t('meetup.filter.level')}</label>
                                 <div className="flex flex-wrap gap-2">
-                                    {LEVELS.map(l => (
+                                    {levelsList.map(l => (
                                         <button
-                                            key={l}
-                                            onClick={() => setFilterLevel(l)}
-                                            className={`px-4 py-2 rounded-xl text-xs font-bold border ${filterLevel === l ? 'bg-neon-green text-black border-neon-green' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
+                                            key={l.value}
+                                            onClick={() => setFilterLevel(l.value)}
+                                            className={`px-4 py-2 rounded-xl text-xs font-bold border ${filterLevel === l.value ? 'bg-neon-green text-black border-neon-green' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
                                         >
-                                            {l}
+                                            {l.label}
                                         </button>
                                     ))}
                                 </div>
@@ -578,20 +593,20 @@ export default function MeetPage() {
 
                             {/* Distance */}
                             <div className="space-y-2">
-                                <label className="text-xs text-gray-500 font-bold uppercase">Distance</label>
+                                <label className="text-xs text-gray-500 font-bold uppercase">{t('meetup.filter.distance')}</label>
                                 <select
                                     value={filterDist}
                                     onChange={(e) => setFilterDist(e.target.value)}
                                     className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:border-neon-green focus:outline-none"
                                 >
-                                    <option value="">Any Distance</option>
+                                    <option value="">{t('meetup.filter.anyDist')}</option>
                                     {DISTANCES.map(d => <option key={d} value={d}>{d}</option>)}
                                 </select>
                             </div>
 
                             {/* Host */}
                             <div className="space-y-2">
-                                <label className="text-xs text-gray-500 font-bold uppercase">Host Name</label>
+                                <label className="text-xs text-gray-500 font-bold uppercase">{t('meetup.filter.host')}</label>
                                 <input
                                     type="text"
                                     value={filterHost}
@@ -603,8 +618,8 @@ export default function MeetPage() {
                         </div>
 
                         <div className="flex gap-3 pt-2">
-                            <button onClick={resetFilters} className="flex-1 py-3 bg-gray-800 rounded-xl font-bold text-gray-400 hover:text-white">Reset</button>
-                            <button onClick={() => setShowFilter(false)} className="flex-[2] py-3 bg-neon-green text-black rounded-xl font-bold hover:bg-[#32D612]">Apply Filters</button>
+                            <button onClick={resetFilters} className="flex-1 py-3 bg-gray-800 rounded-xl font-bold text-gray-400 hover:text-white">{t('meetup.filter.reset')}</button>
+                            <button onClick={() => setShowFilter(false)} className="flex-[2] py-3 bg-neon-green text-black rounded-xl font-bold hover:bg-[#32D612]">{t('meetup.filter.apply')}</button>
                         </div>
                     </div>
                 </div>
@@ -613,8 +628,8 @@ export default function MeetPage() {
             {/* Content */}
             <main className="p-4">
                 <div className="flex justify-between items-end mb-4">
-                    <h2 className="text-xl font-bold">Sessions <span className="text-neon-green text-sm ml-1">({filteredMeets.length})</span></h2>
-                    <span className="text-xs text-gray-400">Sort by: Time</span>
+                    <h2 className="text-xl font-bold">{t('meetup.title')} <span className="text-neon-green text-sm ml-1">({filteredMeets.length})</span></h2>
+                    <span className="text-xs text-gray-400">{t('meetup.sortBy')}</span>
                 </div>
 
                 {view === 'list' ? (
@@ -622,6 +637,10 @@ export default function MeetPage() {
                         {filteredMeets.length > 0 ? filteredMeets.map(meet => {
                             const isHost = meet.host === 'Me' || (myProfile && (meet.host === myProfile.nickname || meet.hostId === myProfile.id));
                             const isExpired = meet.rawEndTime && new Date(meet.rawEndTime) < new Date();
+
+                            // Localization for Sport (for display on card)
+                            const displaySport = t(`meetup.categories.${meet.sport.toLowerCase()}`) || meet.sport;
+                            const displayLevel = t(`meetup.levels.${meet.level?.toLowerCase()}`) || meet.level;
 
                             return (
                                 <div
@@ -640,20 +659,20 @@ export default function MeetPage() {
                                     <div className="flex justify-between items-start mb-3">
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-800 text-neon-green uppercase tracking-wide border border-gray-700">
-                                                {meet.sport}
+                                                {displaySport}
                                             </span>
                                             {meet.status === 'Closing Soon' && (
-                                                <span className="text-[10px] font-bold text-red-500 animate-pulse">Closing Soon</span>
+                                                <span className="text-[10px] font-bold text-red-500 animate-pulse">{t('meetup.card.closingSoon')}</span>
                                             )}
                                             {isHost && (
                                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-neon-green text-black uppercase tracking-wide">
-                                                    My Session
+                                                    {t('meetup.card.mySession')}
                                                 </span>
                                             )}
                                         </div>
                                         <div className="flex flex-col items-end">
                                             <div className="bg-gray-800 rounded-lg px-2 py-1 border border-gray-700 flex flex-col items-center">
-                                                <span className="text-[10px] text-gray-400 uppercase">Join</span>
+                                                <span className="text-[10px] text-gray-400 uppercase">{t('home.join')}</span>
                                                 <span className={`font-bold text-sm ${(Array.isArray(meet.participants) ? meet.participants.length : meet.participants) >= meet.max ? 'text-red-500' : 'text-neon-green'}`}>
                                                     {Array.isArray(meet.participants) ? meet.participants.length : meet.participants}/{meet.max}
                                                 </span>
@@ -665,7 +684,7 @@ export default function MeetPage() {
 
                                     <div className="flex gap-2 mb-3">
                                         <span className="text-[10px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 bg-gray-800/50">
-                                            Lv: {meet.level || 'Any'}
+                                            Lv: {displayLevel}
                                         </span>
                                         <span className="text-[10px] px-1.5 py-0.5 rounded border border-gray-700 text-gray-300 bg-gray-800/50">
                                             {meet.vibe || 'Fun'}
@@ -687,7 +706,7 @@ export default function MeetPage() {
                                     <div className="mt-5 pt-3 border-t border-gray-800/50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="w-5 h-5 rounded-full bg-gray-700 border border-gray-600"></div>
-                                            <span className="text-xs text-gray-500">Hosted by <span className="text-gray-300 font-medium">{meet.host}</span></span>
+                                            <span className="text-xs text-gray-500">{t('meetup.card.hostedBy')} <span className="text-gray-300 font-medium">{meet.host}</span></span>
                                         </div>
                                         <div className="flex gap-2">
                                             {/* Direct Join Button - Hide for Host */}
@@ -702,12 +721,12 @@ export default function MeetPage() {
                                                             : 'bg-neon-green border-neon-green text-black hover:bg-[#32D612]'
                                                         }`}
                                                 >
-                                                    {isExpired ? 'Ended' : joinedMeets.includes(meet.id.toString()) ? 'Joined' : 'Join'}
+                                                    {isExpired ? t('meetup.card.ended') : joinedMeets.includes(meet.id.toString()) ? t('home.joined') : t('home.join')}
                                                 </button>
                                             )}
 
                                             <a href={`/meet/${meet.id}`} className="px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-neon-green font-bold hover:bg-gray-700 transition-all shadow-md">
-                                                View Details
+                                                {t('meetup.card.viewDetails')}
                                             </a>
                                         </div>
                                     </div>
@@ -715,8 +734,8 @@ export default function MeetPage() {
                             );
                         }) : (
                             <div className="text-center py-20 text-gray-500">
-                                <p>No meetups found.</p>
-                                <button onClick={resetFilters} className="text-neon-green text-sm font-bold mt-2 hover:underline">Reset Filters</button>
+                                <p>{t('home.noMeets')}</p>
+                                <button onClick={resetFilters} className="text-neon-green text-sm font-bold mt-2 hover:underline">{t('meetup.filter.reset')}</button>
                             </div>
                         )}
                     </div>
@@ -743,7 +762,7 @@ export default function MeetPage() {
                                             strokeColor: "white",
                                             strokeWeight: 2,
                                         }}
-                                        title="You are here"
+                                        title={t('meetup.map.youAreHere')}
                                     />
                                 )}
 
@@ -768,7 +787,7 @@ export default function MeetPage() {
                             </GoogleMap>
                         ) : (
                             <div className="h-[60vh] bg-gray-900 flex items-center justify-center">
-                                Loading Map...
+                                {t('meetup.map.loading')}
                             </div>
                         )}
                     </div>

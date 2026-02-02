@@ -1,7 +1,10 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Heart, MessageSquare, Send, MoreHorizontal, Edit, Trash2, X, Check, Bookmark } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useLanguage } from '@/context/language-context';
 
 interface Post {
     id: string; // UUID
@@ -27,6 +30,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
     currentUser?: any;
     onDelete?: (id: string) => void;
 }) {
+    const { t } = useLanguage();
     const supabase = createClient();
     const [liked, setLiked] = useState(false);
     const [bookmarked, setBookmarked] = useState(false);
@@ -164,11 +168,11 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
 
     const handleShare = () => {
         navigator.clipboard.writeText(`https://capturenow.app/post/${post.id}`);
-        alert('Link copied to clipboard!');
+        alert(t('common.copyLink'));
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this post?')) return;
+        if (!confirm(t('feed.deleteConfirm'))) return;
 
         const { error } = await supabase.from('highlights').delete().eq('id', post.id);
         if (error) {
@@ -193,6 +197,10 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
 
     const isOwner = currentUser && (post.userId === currentUser.id);
 
+    // Localization: Sport/Level mapping (best effort)
+    const displaySport = post.sport ? (t(`meetup.categories.${post.sport.toLowerCase()}`) || post.sport) : '';
+    const displayLevel = post.level ? (t(`meetup.levels.${post.level.toLowerCase()}`) || post.level) : '';
+
     return (
         <article className={`relative bg-black ${isModal ? 'rounded-2xl overflow-hidden' : 'border-t border-gray-900 pt-4'}`}>
             {/* Post Header */}
@@ -215,7 +223,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                                 <span className="font-bold text-sm leading-none mb-1 group-hover:text-neon-green transition-colors">{post.user}</span>
                                 {post.sport && (
                                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700 mb-1">
-                                        {post.sport} <span className="text-neon-green">{post.level}</span>
+                                        {displaySport} <span className="text-neon-green">{displayLevel}</span>
                                     </span>
                                 )}
                             </div>
@@ -238,13 +246,13 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                                         onClick={() => { setIsEditing(true); setShowOptions(false); }}
                                         className="w-full px-4 py-3 text-left text-xs font-medium text-white hover:bg-gray-800 flex items-center gap-2"
                                     >
-                                        <Edit size={14} /> Edit
+                                        <Edit size={14} /> {t('common.edit')}
                                     </button>
                                     <button
                                         onClick={handleDelete}
                                         className="w-full px-4 py-3 text-left text-xs font-medium text-red-500 hover:bg-gray-800 flex items-center gap-2"
                                     >
-                                        <Trash2 size={14} /> Delete
+                                        <Trash2 size={14} /> {t('common.delete')}
                                     </button>
                                 </div>
                             </>
@@ -252,7 +260,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                     </div>
                 </div>
 
-                <div className="w-8"></div> {/* Placeholder to keep spatial balance if not in modal, or room for modal X */}
+                <div className="w-8"></div> {/* Placeholder */}
             </div>
 
             {/* Post Content */}
@@ -292,7 +300,7 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                     </button>
                 </div>
 
-                <div className="font-bold text-sm px-1">{likeCount.toLocaleString()} likes</div>
+                <div className="font-bold text-sm px-1">{likeCount.toLocaleString()} {t('common.likes')}</div>
 
                 {isEditing ? (
                     <div className="flex gap-2 items-center px-1">
@@ -313,12 +321,12 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                     </div>
                 )}
 
-                <div className="px-1 text-[10px] text-gray-500 uppercase tracking-wide">{post.time} AGO</div>
+                <div className="px-1 text-[10px] text-gray-500 uppercase tracking-wide">{post.time}</div>
 
                 {(showComments || isModal) && (
                     <div className={`mt-4 bg-gray-900/50 rounded-xl p-3 space-y-3 ${!isModal && 'animate-in fade-in slide-in-from-top-2'}`}>
                         <div className="flex justify-between items-center border-b border-gray-800 pb-2">
-                            <span className="text-xs font-bold text-gray-400">Comments ({comments.length})</span>
+                            <span className="text-xs font-bold text-gray-400">{t('common.comments')} ({comments.length})</span>
                             {!isModal && <button onClick={() => setShowComments(false)}><X size={14} className="text-gray-500 hover:text-white" /></button>}
                         </div>
                         <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar">
@@ -328,17 +336,17 @@ export default function FeedCard({ post, isModal = false, onUserClick, currentUs
                                     <span className="text-gray-300">{c.text}</span>
                                 </div>
                             ))}
-                            {comments.length === 0 && <p className="text-xs text-center text-gray-600 py-2">No comments yet.</p>}
+                            {comments.length === 0 && <p className="text-xs text-center text-gray-600 py-2">{t('feed.noComments')}</p>}
                         </div>
                         <form onSubmit={handleAddComment} className="flex gap-2">
                             <input
                                 type="text"
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
-                                placeholder="Add a comment..."
+                                placeholder={t('feed.addComment')}
                                 className="flex-1 bg-black border border-gray-800 rounded-full px-3 py-2 text-xs focus:border-neon-green focus:outline-none"
                             />
-                            <button type="submit" className="text-neon-green font-bold text-xs px-2">Post</button>
+                            <button type="submit" className="text-neon-green font-bold text-xs px-2">{t('feed.postBtn')}</button>
                         </form>
                     </div>
                 )}

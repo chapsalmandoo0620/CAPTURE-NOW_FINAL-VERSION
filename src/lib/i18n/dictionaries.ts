@@ -11,6 +11,152 @@ export const dictionaries = {
             confirm: "Confirm",
             cancel: "Cancel",
             language: "Language",
+            search: "Search",
+            edit: "Edit",
+            delete: "Delete",
+            save: "Save",
+            likes: "likes",
+            comments: "Comments",
+            share: "Share",
+            copyLink: "Link copied to clipboard!",
+        },
+        nav: {
+            home: "Home",
+            meet: "Meet",
+            upload: "Upload",
+            profile: "Profile",
+            menu: "Menu"
+        },
+        home: {
+            upcomingNearby: "Upcoming Nearby",
+            seeAll: "See all",
+            upNext: "Up Next",
+            join: "Join",
+            joined: "Joined",
+            spotsAvailable: "spots available",
+            noMeets: "No upcoming meetups nearby.",
+            createOne: "Create one!",
+            noPosts: "No posts yet",
+            beFirst: "Be the first to share a highlight!",
+            shareNow: "Share Now",
+            notification: {
+                title: "Notifications",
+                empty: "No notifications yet.",
+                markAllRead: "Mark all as read"
+            }
+        },
+        meetup: {
+            title: "Sessions",
+            sortBy: "Sort by: Time",
+            filter: {
+                title: "Filter Sessions",
+                sport: "Sport",
+                level: "Level",
+                distance: "Distance",
+                host: "Host Name",
+                reset: "Reset",
+                apply: "Apply Filters",
+                anyDist: "Any Distance"
+            },
+            card: {
+                mySession: "My Session",
+                closingSoon: "Closing Soon",
+                ended: "Ended",
+                viewDetails: "View Details",
+                hostedBy: "Hosted by"
+            },
+            map: {
+                youAreHere: "You are here",
+                loading: "Loading Map..."
+            },
+            categories: {
+                all: "All",
+                running: "Running",
+                cycling: "Cycling",
+                soccer: "Soccer",
+                basketball: "Basketball",
+                tennis: "Tennis",
+                golf: "Golf",
+                climbing: "Climbing",
+                fitness: "Fitness",
+                yoga: "Yoga",
+                swimming: "Swimming",
+                hiking: "Hiking"
+            },
+            levels: {
+                beginner: "Beginner",
+                intermediate: "Intermediate",
+                advanced: "Advanced",
+                any: "Any"
+            }
+        },
+        upload: {
+            title: "New Post",
+            selectPrompt: "Select Photo or Video",
+            openCamera: "Open Camera",
+            preview: "Preview",
+            selectSport: "Select Sport (Optional)",
+            selectLevel: "Select Level (Optional)",
+            locationProto: "Location",
+            locationPlace: "Add location name...",
+            captionPlace: "Write a caption...",
+            uploading: "Uploading...",
+            shareMoment: "Share Moment",
+            loginReq: "Please login to upload."
+        },
+        profile: {
+            posts: "Posts",
+            followers: "Followers",
+            following: "Following",
+            editProfile: "Edit Profile",
+            shareProfile: "Share Profile",
+            meetingScore: "Meeting Score",
+            starPlayer: "Star Player",
+            mannerPlayer: "Manner Player",
+            tabs: {
+                moments: "Moments",
+                joined: "Joined"
+            },
+            emptyJoined: "You haven't joined any sessions yet.",
+            findSession: "Find a Session"
+        },
+        meetupDetail: {
+            hostedBy: "Hosted by",
+            distance: "Distance",
+            joining: "Joining",
+            aboutSession: "About Session",
+            location: "Location",
+            chat: "Chat",
+            active: "Active",
+            sessionEnded: "Session Ended",
+            chatDisabled: "Session Ended - Chat Disabled",
+            joinSession: "Join Session",
+            leaveSession: "Leave Session",
+            endMeetup: "End Meetup & Request Feedback",
+            feedbackWait: "Ending the meetup will notify all participants to provide feedback.",
+            loading: "Loading...",
+            notFound: "Session not found",
+            goBack: "Go Back",
+            typeMessage: "Type a message...",
+            noMessages: "No messages yet. Say hi!",
+            joinToChat: "Join session to chat with members",
+            loadingMap: "Loading Map...",
+            noMap: "No map location provided"
+        },
+        messages: {
+            title: "Messages",
+            searchPlaceholder: "Search messages...",
+            noMessages: "No messages yet.",
+            newMessage: "New Message",
+            following: "Following",
+            noFollowing: "You aren't following anyone yet.",
+            you: "You"
+        },
+        feed: {
+            noComments: "No comments yet.",
+            addComment: "Add a comment...",
+            postBtn: "Post",
+            deleteConfirm: "Are you sure you want to delete this post?",
         },
         tutorial: {
             step1: {
@@ -81,6 +227,152 @@ export const dictionaries = {
             confirm: "확인",
             cancel: "취소",
             language: "언어 설정",
+            search: "검색",
+            edit: "수정",
+            delete: "삭제",
+            save: "저장",
+            likes: "좋아요",
+            comments: "댓글",
+            share: "공유",
+            copyLink: "링크가 복사되었습니다!",
+        },
+        nav: {
+            home: "홈",
+            meet: "모임",
+            upload: "업로드",
+            profile: "프로필",
+            menu: "메뉴"
+        },
+        home: {
+            upcomingNearby: "내 주변 모임",
+            seeAll: "전체보기",
+            upNext: "다음 일정",
+            join: "참여",
+            joined: "참여중",
+            spotsAvailable: "자리 남음",
+            noMeets: "주변에 예정된 모임이 없습니다.",
+            createOne: "모임 만들기!",
+            noPosts: "게시물이 없습니다",
+            beFirst: "첫 번째 하이라이트를 공유해보세요!",
+            shareNow: "지금 공유하기",
+            notification: {
+                title: "알림",
+                empty: "새로운 알림이 없습니다.",
+                markAllRead: "모두 읽음 처리"
+            }
+        },
+        meetup: {
+            title: "모임 세션",
+            sortBy: "정렬: 시간순",
+            filter: {
+                title: "필터",
+                sport: "종목",
+                level: "레벨",
+                distance: "거리",
+                host: "호스트",
+                reset: "초기화",
+                apply: "필터 적용",
+                anyDist: "모든 거리"
+            },
+            card: {
+                mySession: "내 세션",
+                closingSoon: "마감 임박",
+                ended: "종료됨",
+                viewDetails: "상세보기",
+                hostedBy: "호스트:"
+            },
+            map: {
+                youAreHere: "현재 위치",
+                loading: "지도 불러오는 중..."
+            },
+            categories: {
+                all: "전체",
+                running: "러닝",
+                cycling: "사이클",
+                soccer: "축구",
+                basketball: "농구",
+                tennis: "테니스",
+                golf: "골프",
+                climbing: "클라이밍",
+                fitness: "피트니스",
+                yoga: "요가",
+                swimming: "수영",
+                hiking: "등산"
+            },
+            levels: {
+                beginner: "초급",
+                intermediate: "중급",
+                advanced: "고급",
+                any: "무관"
+            }
+        },
+        upload: {
+            title: "새 게시물",
+            selectPrompt: "사진 또는 동영상 선택",
+            openCamera: "카메라 열기",
+            preview: "미리보기",
+            selectSport: "종목 선택 (선택)",
+            selectLevel: "레벨 선택 (선택)",
+            locationProto: "위치",
+            locationPlace: "위치 이름 추가...",
+            captionPlace: "문구를 작성하세요...",
+            uploading: "업로드 중...",
+            shareMoment: "공유하기",
+            loginReq: "로그인이 필요합니다."
+        },
+        profile: {
+            posts: "게시물",
+            followers: "팔로워",
+            following: "팔로잉",
+            editProfile: "프로필 수정",
+            shareProfile: "프로필 공유",
+            meetingScore: "모임 점수",
+            starPlayer: "스타 플레이어",
+            mannerPlayer: "매너 플레이어",
+            tabs: {
+                moments: "모먼트",
+                joined: "참여내역"
+            },
+            emptyJoined: "아직 참여한 모임이 없습니다.",
+            findSession: "모임 찾기"
+        },
+        meetupDetail: {
+            hostedBy: "호스트:",
+            distance: "거리",
+            joining: "참여 중",
+            aboutSession: "모임 소개",
+            location: "위치",
+            chat: "채팅",
+            active: "활동 중",
+            sessionEnded: "모임 종료",
+            chatDisabled: "모임 종료 - 채팅 불가",
+            joinSession: "참여하기",
+            leaveSession: "나가기",
+            endMeetup: "모임 종료 및 피드백 요청",
+            feedbackWait: "모임을 종료하면 모든 참여자에게 피드백 요청이 전송됩니다.",
+            loading: "로딩 중...",
+            notFound: "모임을 찾을 수 없습니다",
+            goBack: "뒤로 가기",
+            typeMessage: "메시지 입력...",
+            noMessages: "메시지가 없습니다. 인사를 건네보세요!",
+            joinToChat: "모임에 참여하여 대화를 나눠보세요",
+            loadingMap: "지도 로딩 중...",
+            noMap: "위치 정보가 없습니다"
+        },
+        messages: {
+            title: "메시지",
+            searchPlaceholder: "메시지 검색...",
+            noMessages: "메시지가 없습니다.",
+            newMessage: "새 메시지",
+            following: "팔로잉",
+            noFollowing: "아직 팔로우 중인 사용자가 없습니다.",
+            you: "나"
+        },
+        feed: {
+            noComments: "댓글이 없습니다.",
+            addComment: "댓글 달기...",
+            postBtn: "게시",
+            deleteConfirm: "정말 이 게시물을 삭제하시겠습니까?",
         },
         tutorial: {
             step1: {
@@ -151,6 +443,152 @@ export const dictionaries = {
             confirm: "確認",
             cancel: "キャンセル",
             language: "言語設定",
+            search: "検索",
+            edit: "編集",
+            delete: "削除",
+            save: "保存",
+            likes: "いいね",
+            comments: "コメント",
+            share: "共有",
+            copyLink: "リンクをコピーしました！",
+        },
+        nav: {
+            home: "ホーム",
+            meet: "集まり",
+            upload: "投稿",
+            profile: "プロフィール",
+            menu: "メニュー"
+        },
+        home: {
+            upcomingNearby: "近くの集まり",
+            seeAll: "すべて見る",
+            upNext: "次の予定",
+            join: "参加",
+            joined: "参加中",
+            spotsAvailable: "空きあり",
+            noMeets: "近くに予定された集まりはありません。",
+            createOne: "集まりを作る！",
+            noPosts: "投稿がまだありません",
+            beFirst: "最初のハイライトを共有しましょう！",
+            shareNow: "共有する",
+            notification: {
+                title: "通知",
+                empty: "新しい通知はありません。",
+                markAllRead: "すべて既読にする"
+            }
+        },
+        meetup: {
+            title: "セッション一覧",
+            sortBy: "並び替え: 時間順",
+            filter: {
+                title: "フィルター",
+                sport: "種目",
+                level: "レベル",
+                distance: "距離",
+                host: "ホスト",
+                reset: "リセット",
+                apply: "適用",
+                anyDist: "すべての距離"
+            },
+            card: {
+                mySession: "自分のセッション",
+                closingSoon: "締切間近",
+                ended: "終了",
+                viewDetails: "詳細を見る",
+                hostedBy: "ホスト:"
+            },
+            map: {
+                youAreHere: "現在地",
+                loading: "地図を読み込み中..."
+            },
+            categories: {
+                all: "すべて",
+                running: "ランニング",
+                cycling: "サイクリング",
+                soccer: "サッカー",
+                basketball: "バスケ",
+                tennis: "テニス",
+                golf: "ゴルフ",
+                climbing: "クライミング",
+                fitness: "フィットネス",
+                yoga: "ヨガ",
+                swimming: "水泳",
+                hiking: "ハイキング"
+            },
+            levels: {
+                beginner: "初級",
+                intermediate: "中級",
+                advanced: "上級",
+                any: "不問"
+            }
+        },
+        upload: {
+            title: "新規投稿",
+            selectPrompt: "写真または動画を選択",
+            openCamera: "カメラを開く",
+            preview: "プレビュー",
+            selectSport: "種目を選択 (任意)",
+            selectLevel: "レベルを選択 (任意)",
+            locationProto: "位置情報",
+            locationPlace: "場所の名前を追加...",
+            captionPlace: "キャプションを入力...",
+            uploading: "アップロード中...",
+            shareMoment: "共有する",
+            loginReq: "ログインが必要です。"
+        },
+        profile: {
+            posts: "投稿",
+            followers: "フォロワー",
+            following: "フォロー中",
+            editProfile: "プロフィール編集",
+            shareProfile: "プロフィール共有",
+            meetingScore: "集まりスコア",
+            starPlayer: "スタープレイヤー",
+            mannerPlayer: "マナープレイヤー",
+            tabs: {
+                moments: "モーメント",
+                joined: "参加履歴"
+            },
+            emptyJoined: "まだ参加した集まりがありません。",
+            findSession: "集まりを探す"
+        },
+        meetupDetail: {
+            hostedBy: "主催:",
+            distance: "距離",
+            joining: "参加中",
+            aboutSession: "ミートアップについて",
+            location: "場所",
+            chat: "チャット",
+            active: "アクティブ",
+            sessionEnded: "終了",
+            chatDisabled: "終了 - チャット不可",
+            joinSession: "参加する",
+            leaveSession: "退室する",
+            endMeetup: "終了してフィードバックをリクエスト",
+            feedbackWait: "終了すると全員にフィードバックリクエストが送信されます。",
+            loading: "読み込み中...",
+            notFound: "セッションが見つかりません",
+            goBack: "戻る",
+            typeMessage: "メッセージを入力...",
+            noMessages: "メッセージはまだありません。挨拶してみましょう！",
+            joinToChat: "参加してチャットしよう",
+            loadingMap: "地図を読み込み中...",
+            noMap: "位置情報がありません"
+        },
+        messages: {
+            title: "メッセージ",
+            searchPlaceholder: "メッセージを検索...",
+            noMessages: "メッセージはありません。",
+            newMessage: "新規メッセージ",
+            following: "フォロー中",
+            noFollowing: "フォロー中のユーザーがいません。",
+            you: "あなた"
+        },
+        feed: {
+            noComments: "コメントがありません。",
+            addComment: "コメントを追加...",
+            postBtn: "投稿",
+            deleteConfirm: "本当にこの投稿を削除しますか？",
         },
         tutorial: {
             step1: {
@@ -221,6 +659,152 @@ export const dictionaries = {
             confirm: "确认",
             cancel: "取消",
             language: "语言设置",
+            search: "搜索",
+            edit: "编辑",
+            delete: "删除",
+            save: "保存",
+            likes: "点赞",
+            comments: "评论",
+            share: "分享",
+            copyLink: "链接已复制到剪贴板！",
+        },
+        nav: {
+            home: "首页",
+            meet: "聚会",
+            upload: "发布",
+            profile: "我的",
+            menu: "菜单"
+        },
+        home: {
+            upcomingNearby: "附近聚会",
+            seeAll: "查看全部",
+            upNext: "即将开始",
+            join: "加入",
+            joined: "已加入",
+            spotsAvailable: "个名额",
+            noMeets: "附近暂无聚会。",
+            createOne: "创建一个！",
+            noPosts: "暂无帖子",
+            beFirst: "分享你的第一个精彩瞬间！",
+            shareNow: "立即分享",
+            notification: {
+                title: "通知",
+                empty: "暂无新通知。",
+                markAllRead: "全部已读"
+            }
+        },
+        meetup: {
+            title: "聚会列表",
+            sortBy: "排序：时间",
+            filter: {
+                title: "筛选",
+                sport: "运动项目",
+                level: "等级",
+                distance: "距离",
+                host: "发起人",
+                reset: "重置",
+                apply: "应用筛选",
+                anyDist: "任意距离"
+            },
+            card: {
+                mySession: "我的活动",
+                closingSoon: "即将截止",
+                ended: "已结束",
+                viewDetails: "查看详情",
+                hostedBy: "发起人："
+            },
+            map: {
+                youAreHere: "你的位置",
+                loading: "地图加载中..."
+            },
+            categories: {
+                all: "全部",
+                running: "跑步",
+                cycling: "骑行",
+                soccer: "足球",
+                basketball: "篮球",
+                tennis: "网球",
+                golf: "高尔夫",
+                climbing: "攀岩",
+                fitness: "健身",
+                yoga: "瑜伽",
+                swimming: "游泳",
+                hiking: "徒步"
+            },
+            levels: {
+                beginner: "初级",
+                intermediate: "中级",
+                advanced: "高级",
+                any: "不限"
+            }
+        },
+        upload: {
+            title: "发布动态",
+            selectPrompt: "选择照片或视频",
+            openCamera: "打开相机",
+            preview: "预览",
+            selectSport: "选择项目 (可选)",
+            selectLevel: "选择等级 (可选)",
+            locationProto: "位置",
+            locationPlace: "添加位置名称...",
+            captionPlace: "写点什么...",
+            uploading: "上传中...",
+            shareMoment: "发布动态",
+            loginReq: "请先登录。"
+        },
+        profile: {
+            posts: "动态",
+            followers: "粉丝",
+            following: "关注",
+            editProfile: "编辑资料",
+            shareProfile: "分享个人主页",
+            meetingScore: "聚会评分",
+            starPlayer: "明星玩家",
+            mannerPlayer: "礼貌玩家",
+            tabs: {
+                moments: "动态",
+                joined: "参与记录"
+            },
+            emptyJoined: "暂无参与记录。",
+            findSession: "寻找聚会"
+        },
+        meetupDetail: {
+            hostedBy: "发起人:",
+            distance: "距离",
+            joining: "已加入",
+            aboutSession: "关于聚会",
+            location: "位置",
+            chat: "聊天",
+            active: "活跃",
+            sessionEnded: "聚会结束",
+            chatDisabled: "聚会结束 - 禁止聊天",
+            joinSession: "加入聚会",
+            leaveSession: "退出聚会",
+            endMeetup: "结束聚会并请求反馈",
+            feedbackWait: "结束聚会后将向所有参与者发送反馈请求。",
+            loading: "加载中...",
+            notFound: "未找到聚会",
+            goBack: "返回",
+            typeMessage: "输入消息...",
+            noMessages: "暂无消息。打个招呼吧！",
+            joinToChat: "加入聚会以参与聊天",
+            loadingMap: "地图加载中...",
+            noMap: "无位置信息"
+        },
+        messages: {
+            title: "消息",
+            searchPlaceholder: "搜索消息...",
+            noMessages: "暂无消息。",
+            newMessage: "新消息",
+            following: "关注列表",
+            noFollowing: "尚未关注任何用户。",
+            you: "你"
+        },
+        feed: {
+            noComments: "暂无评论。",
+            addComment: "添加评论...",
+            postBtn: "发送",
+            deleteConfirm: "确定要删除这条动态吗？",
         },
         tutorial: {
             step1: {

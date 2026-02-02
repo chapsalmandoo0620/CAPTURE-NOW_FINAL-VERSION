@@ -6,14 +6,7 @@ import { Home, Search, Plus, User, Menu, Aperture } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect } from 'react';
-
-const NAV_ITEMS = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: '/meet', icon: Search, label: 'Meet' },
-    { href: '/upload', icon: Plus, label: 'Upload', isSpecial: true }, // Special styling flag
-    { href: '/profile', icon: User, label: 'Profile' },
-    { href: '/menu', icon: Menu, label: 'Menu' },
-];
+import { useLanguage } from '@/context/language-context';
 
 export default function MainLayout({
     children,
@@ -22,6 +15,15 @@ export default function MainLayout({
 }) {
     const pathname = usePathname();
     const router = useRouter();
+    const { t } = useLanguage();
+
+    const NAV_ITEMS = [
+        { href: '/', icon: Home, label: t('nav.home') },
+        { href: '/meet', icon: Search, label: t('nav.meet') },
+        { href: '/upload', icon: Plus, label: t('nav.upload'), isSpecial: true }, // Special styling flag
+        { href: '/profile', icon: User, label: t('nav.profile') },
+        { href: '/menu', icon: Menu, label: t('nav.menu') },
+    ];
 
     // Check for profile existence immediately on mount
     useEffect(() => {

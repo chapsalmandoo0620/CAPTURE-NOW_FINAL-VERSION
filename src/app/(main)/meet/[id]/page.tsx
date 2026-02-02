@@ -7,6 +7,7 @@ import { ChevronLeft, MapPin, Calendar, Users, MessageCircle, Share2, MoreHorizo
 import MeetupFeedbackModal from '@/components/meetup-feedback-modal';
 import { createClient } from '@/lib/supabase/client';
 import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
+import { useLanguage } from '@/context/language-context';
 
 const MAP_CONTAINER_STYLE = {
     width: '100%',
@@ -102,6 +103,7 @@ const MAP_OPTIONS = {
 const libraries: ("places")[] = ["places"];
 
 export default function MeetDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { t } = useLanguage();
     const router = useRouter();
     const { id } = use(params);
     const [isJoined, setIsJoined] = useState(false);
@@ -207,7 +209,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
 
     const handleJoinToggle = async () => {
         if (!meetData || !myProfile) {
-            alert("Please login to join.");
+            alert(t('upload.loginReq'));
             return;
         }
 
@@ -280,7 +282,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
             if (!error && data) {
                 const formatted = data.map((m: any) => ({
                     id: m.id,
-                    user: m.sender?.id === myProfile?.id ? 'Me' : m.sender?.nickname || 'Unknown',
+                    user: m.sender?.id === myProfile?.id ? t('messages.you') : m.sender?.nickname || 'Unknown',
                     userId: m.sender?.id, // Store ID for stable strict checks
                     text: m.content,
                     time: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -314,7 +316,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
 
                     const formattedMsg = {
                         id: newMsg.id,
-                        user: senderData?.id === myProfile?.id ? 'Me' : senderData?.nickname || 'Unknown',
+                        user: senderData?.id === myProfile?.id ? t('messages.you') : senderData?.nickname || 'Unknown',
                         userId: senderData?.id,
                         text: newMsg.content,
                         time: new Date(newMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -329,7 +331,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [id, myProfile?.id]); // Re-run if myProfile loads late
+    }, [id, myProfile?.id, t]); // Re-run if myProfile loads late
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -425,13 +427,17 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
         router.push('/meet');
     };
 
-    if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">Loading...</div>;
+    if (loading) return <div className="min-h-screen bg-black text-white flex items-center justify-center">{t('meetupDetail.loading')}</div>;
     if (!meetData) return (
         <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
-            <h2 className="text-xl font-bold">Session not found</h2>
-            <button onClick={() => router.back()} className="px-4 py-2 bg-gray-800 rounded-xl hover:bg-gray-700">Go Back</button>
+            <h2 className="text-xl font-bold">{t('meetupDetail.notFound')}</h2>
+            <button onClick={() => router.back()} className="px-4 py-2 bg-gray-800 rounded-xl hover:bg-gray-700">{t('meetupDetail.goBack')}</button>
         </div>
     );
+
+    // Localization: Sport/Level mapping
+    const displaySport = meetData.sport ? (t(`meetup.categories.${meetData.sport.toLowerCase()}`) || meetData.sport) : '';
+    const displayLevel = meetData.level ? (t(`meetup.levels.${meetData.level.toLowerCase()}`) || meetData.level) : '';
 
     return (
         <div className="min-h-screen bg-black text-white pb-24">
@@ -452,11 +458,11 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
                         <span className="text-neon-green font-bold text-xs uppercase tracking-wide bg-neon-green/10 px-2 py-1 rounded-md border border-neon-green/20">
-                            {meetData.sport}
+                            {displaySport}
                         </span>
                         <div className="flex gap-2">
                             <span className="text-xs px-2 py-0.5 rounded border border-gray-700 text-gray-400 bg-gray-900">
-                                {meetData.level || 'Any Level'}
+                                {displayLevel}
                             </span>
                             <span className="text-xs px-2 py-0.5 rounded border border-gray-700 text-gray-400 bg-gray-900">
                                 {meetData.vibe || 'Fun'}
@@ -476,7 +482,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                 <User size={16} className="text-gray-400" />
                             )}
                         </div>
-                        <span className="text-sm text-gray-400">Hosted by <Link href={`/profile/${meetData.host}`} className="text-white font-bold hover:text-neon-green transition-colors underline-offset-2 hover:underline">{meetData.host}</Link></span>
+                        <span className="text-sm text-gray-400">{t('meetupDetail.hostedBy')} <Link href={`/profile/${meetData.host}`} className="text-white font-bold hover:text-neon-green transition-colors underline-offset-2 hover:underline">{meetData.host}</Link></span>
                     </div>
                 </div>
 
@@ -495,13 +501,13 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                         <MapPin className="text-gray-500 shrink-0 mt-0.5" size={20} />
                         <div>
                             <div className="font-bold">{meetData.loc}</div>
-                            <div className="text-gray-400 text-sm">Distance: {meetData.dist}</div>
+                            <div className="text-gray-400 text-sm">{t('meetupDetail.distance')}: {meetData.dist}</div>
                         </div>
                     </div>
                     <div className="flex items-start gap-3">
                         <Users className="text-gray-500 shrink-0 mt-0.5" size={20} />
                         <div className="w-full">
-                            <div className="font-bold mb-2">{meetData.participants.length} / {meetData.max} Joining</div>
+                            <div className="font-bold mb-2">{meetData.participants.length} / {meetData.max} {t('meetupDetail.joining')}</div>
                             <div className="flex -space-x-2 overflow-hidden py-1">
                                 {meetData.participants && meetData.participants.slice(0, 8).map((user: any, idx: number) => (
                                     <div key={idx} className="w-8 h-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center relative group shrink-0">
@@ -524,7 +530,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
 
                 {/* Description */}
                 <div className="space-y-2">
-                    <h3 className="font-bold text-lg">About Session</h3>
+                    <h3 className="font-bold text-lg">{t('meetupDetail.aboutSession')}</h3>
                     <div className="p-4 bg-gray-900/50 rounded-2xl border border-gray-800/50">
                         <p className="text-gray-300 leading-relaxed text-sm whitespace-pre-line">
                             {meetData.description}
@@ -534,7 +540,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
 
                 {/* Map Placeholder */}
                 <div className="space-y-2">
-                    <h3 className="font-bold text-lg">Location</h3>
+                    <h3 className="font-bold text-lg">{t('meetupDetail.location')}</h3>
                     <div className="aspect-video w-full bg-gray-800 rounded-2xl flex flex-col items-center justify-center border border-gray-700 relative overflow-hidden group">
                         {meetData.latitude && meetData.longitude && isLoaded ? (
                             <GoogleMap
@@ -562,7 +568,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                             <div className="flex flex-col items-center text-gray-500">
                                 <MapPin size={32} className="mb-2 opacity-50" />
                                 <span className="text-xs">
-                                    {!isLoaded ? 'Loading Map...' : 'No map location provided'}
+                                    {!isLoaded ? t('meetupDetail.loadingMap') : t('meetupDetail.noMap')}
                                 </span>
                             </div>
                         )}
@@ -574,11 +580,11 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="font-bold text-lg flex items-center gap-2">
                             <MessageCircle className="text-neon-green" size={20} />
-                            Chat
+                            {t('meetupDetail.chat')}
                         </h3>
                         <span className="text-xs text-gray-500 flex items-center gap-1">
                             <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></div>
-                            {meetData.participants.length} Active
+                            {meetData.participants.length} {t('meetupDetail.active')}
                         </span>
                     </div>
 
@@ -586,14 +592,14 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                         <div className="space-y-3">
                             <div className="h-48 overflow-y-auto custom-scrollbar space-y-3 pr-1">
                                 {chatMessages.map(msg => (
-                                    <div key={msg.id} className={`flex flex-col ${msg.user === 'Me' ? 'items-end' : 'items-start'}`}>
+                                    <div key={msg.id} className={`flex flex-col ${msg.user === t('messages.you') ? 'items-end' : 'items-start'}`}>
                                         <div className="flex items-end gap-2 max-w-[85%]">
-                                            {msg.user !== 'Me' && (
+                                            {msg.user !== t('messages.you') && (
                                                 <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0 flex items-center justify-center">
                                                     <span className="text-[10px] font-bold">{msg.user.slice(0, 1)}</span>
                                                 </div>
                                             )}
-                                            <div className={`px-3 py-2 rounded-xl text-sm ${msg.user === 'Me'
+                                            <div className={`px-3 py-2 rounded-xl text-sm ${msg.user === t('messages.you')
                                                 ? 'bg-neon-green text-black rounded-tr-none'
                                                 : 'bg-gray-800 text-gray-200 rounded-tl-none'
                                                 }`}>
@@ -603,7 +609,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                         <span className="text-[10px] text-gray-600 mt-1 px-1">{msg.time}</span>
                                     </div>
                                 ))}
-                                {chatMessages.length === 0 && <p className="text-center text-gray-500 text-xs py-4">No messages yet. Say hi!</p>}
+                                {chatMessages.length === 0 && <p className="text-center text-gray-500 text-xs py-4">{t('meetupDetail.noMessages')}</p>}
                             </div>
 
                             {/* Chat Input or Expired Message */}
@@ -611,7 +617,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                 <div className="py-3 mt-2 border-t border-gray-800 text-center">
                                     <span className="text-xs text-red-500 font-bold flex items-center justify-center gap-1">
                                         <Clock size={14} />
-                                        Session Ended - Chat Disabled
+                                        {t('meetupDetail.chatDisabled')}
                                     </span>
                                 </div>
                             ) : (
@@ -620,7 +626,7 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                         type="text"
                                         value={message}
                                         onChange={(e) => setMessage(e.target.value)}
-                                        placeholder="Type a message..."
+                                        placeholder={t('meetupDetail.typeMessage')}
                                         className="flex-1 bg-black/50 border border-gray-700 rounded-full px-4 py-2 text-sm focus:border-neon-green focus:outline-none transition-colors"
                                     />
                                     <button
@@ -636,12 +642,12 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                     ) : meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date() ? (
                         <div className="h-32 bg-black/20 rounded-xl border border-gray-800/50 flex flex-col items-center justify-center text-gray-500 gap-2">
                             <Clock size={32} className="opacity-20 text-red-500" />
-                            <span className="text-xs text-red-400 font-bold">Session Ended - Chat Disabled</span>
+                            <span className="text-xs text-red-400 font-bold">{t('meetupDetail.chatDisabled')}</span>
                         </div>
                     ) : (
                         <div className="h-32 bg-black/20 rounded-xl border border-gray-800/50 flex flex-col items-center justify-center text-gray-500 gap-2">
                             <MessageCircle size={32} className="opacity-20" />
-                            <span className="text-xs">Join session to chat with members</span>
+                            <span className="text-xs">{t('meetupDetail.joinToChat')}</span>
                         </div>
                     )}
                 </div>
@@ -654,10 +660,10 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                 onClick={() => setShowFeedbackModal(true)}
                                 className="w-full py-4 rounded-xl bg-red-500/10 border border-red-500/50 text-red-500 font-bold text-sm hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2"
                             >
-                                End Meetup & Request Feedback
+                                {t('meetupDetail.endMeetup')}
                             </button>
                             <p className="text-[10px] text-gray-500 text-center">
-                                Ending the meetup will notify all participants to provide feedback.
+                                {t('meetupDetail.feedbackWait')}
                             </p>
                         </>
                     ) : (
@@ -672,8 +678,8 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
                                 }`}
                         >
                             {meetData.rawEndTime && new Date(meetData.rawEndTime) < new Date()
-                                ? 'Session Ended'
-                                : isJoined ? 'Leave Session' : 'Join Session'}
+                                ? t('meetupDetail.sessionEnded')
+                                : isJoined ? t('meetupDetail.leaveSession') : t('meetupDetail.joinSession')}
                         </button>
                     )}
                 </div>

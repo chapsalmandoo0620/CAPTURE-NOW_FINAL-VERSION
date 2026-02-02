@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import FeedCard from '@/components/feed-card';
 import NotificationDrawer, { NotificationItem } from '@/components/notification-drawer';
+import { useLanguage } from '@/context/language-context';
 
 // Helper for Emojis
 function getEmoji(sport: string) {
@@ -52,6 +53,7 @@ function getTimeAgo(isoString: string) {
 }
 
 export default function HomePage() {
+    const { t } = useLanguage();
     const [posts, setPosts] = useState<any[]>([]);
     const [quickMeets, setQuickMeets] = useState<any[]>([]);
     const [liveMeet, setLiveMeet] = useState<any>(null);
@@ -76,10 +78,6 @@ export default function HomePage() {
             const diffHours = diffMs / (1000 * 60 * 60);
 
             // Logic: 24h, 12h, 6h, 1h
-            // We define a window (e.g. ± 30 mins) to catch the event roughly
-            // Since this runs client side on load, it's not a perfect cron job.
-            // We'll just check if it's "Upcoming" in logical buckets for the UI display.
-
             let reminderType = null;
             if (diffHours > 0 && diffHours <= 1.1) reminderType = "Starting in 1 hour!";
             else if (diffHours > 5 && diffHours <= 6.1) reminderType = "Starting in 6 hours!";
@@ -133,7 +131,7 @@ export default function HomePage() {
                     feedbackNotifs.push({
                         id: `feedback-${m.id}`,
                         type: 'feedback',
-                        title: 'Meeting Ended',
+                        title: 'Meeting Ended', // could act locally here but notifications are complex
                         message: `${m.title} has ended. Please leave feedback!`,
                         timestamp: new Date(m.end_time || now).getTime(),
                         time: getTimeAgo(m.end_time || now.toISOString()),
@@ -345,7 +343,7 @@ export default function HomePage() {
         const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
-            alert('Please login join.');
+            alert(t('upload.loginReq'));
             return;
         }
 
@@ -423,10 +421,10 @@ export default function HomePage() {
                             <div className="z-10">
                                 <h2 className="text-neon-green font-bold text-xs uppercase tracking-wider mb-1 flex items-center gap-1">
                                     <span className="w-2 h-2 bg-neon-green rounded-full animate-pulse"></span>
-                                    Up Next
+                                    {t('home.upNext')}
                                 </h2>
                                 <p className="font-bold text-lg truncate max-w-[180px]">{liveMeet.title}</p>
-                                <p className="text-gray-400 text-xs mt-1">{liveMeet.max_participants || 10} spots available</p>
+                                <p className="text-gray-400 text-xs mt-1">{liveMeet.max_participants || 10} {t('home.spotsAvailable')}</p>
                             </div>
                             <button
                                 onClick={handleJoinLive}
@@ -435,7 +433,7 @@ export default function HomePage() {
                                     : 'bg-neon-green text-black hover:bg-white'
                                     }`}
                             >
-                                {isLiveJoined ? 'Joined' : 'Join'}
+                                {isLiveJoined ? t('home.joined') : t('home.join')}
                             </button>
                         </div>
                     </Link>
@@ -445,8 +443,8 @@ export default function HomePage() {
             {/* Quick Join */}
             <section className="mb-4">
                 <div className="px-4 mb-2 flex justify-between items-end">
-                    <h3 className="font-bold text-lg">Upcoming Nearby</h3>
-                    <Link href="/meet" className="text-xs text-gray-400 hover:text-white">See all</Link>
+                    <h3 className="font-bold text-lg">{t('home.upcomingNearby')}</h3>
+                    <Link href="/meet" className="text-xs text-gray-400 hover:text-white">{t('home.seeAll')}</Link>
                 </div>
                 {quickMeets.length > 0 ? (
                     <div className="flex px-4 gap-4 overflow-x-auto pb-4 custom-scrollbar">
@@ -474,7 +472,7 @@ export default function HomePage() {
                     </div>
                 ) : (
                     <div className="px-4 py-8 text-center text-gray-500 text-sm bg-gray-900/30 mx-4 rounded-xl border border-gray-800 border-dashed">
-                        No upcoming meetups nearby. <br /> <Link href="/meet/create" className="text-neon-green underline">Create one!</Link>
+                        {t('home.noMeets')} <br /> <Link href="/meet/create" className="text-neon-green underline">{t('home.createOne')}</Link>
                     </div>
                 )}
             </section>
@@ -488,9 +486,9 @@ export default function HomePage() {
                         <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mb-4">
                             <Aperture className="text-gray-600" />
                         </div>
-                        <h3 className="text-gray-400 font-bold">No posts yet</h3>
-                        <p className="text-gray-600 text-sm mt-1">Be the first to share a highlight!</p>
-                        <Link href="/upload" className="mt-4 px-6 py-2 bg-neon-green text-black font-bold rounded-full">Share Now</Link>
+                        <h3 className="text-gray-400 font-bold">{t('home.noPosts')}</h3>
+                        <p className="text-gray-600 text-sm mt-1">{t('home.beFirst')}</p>
+                        <Link href="/upload" className="mt-4 px-6 py-2 bg-neon-green text-black font-bold rounded-full">{t('home.shareNow')}</Link>
                     </div>
                 )}
             </section>

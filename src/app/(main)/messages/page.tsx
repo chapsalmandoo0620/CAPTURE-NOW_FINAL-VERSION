@@ -5,8 +5,10 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Search, MessageCircle, Plus, X } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 
 export default function MessagesInboxPage() {
+    const { t } = useLanguage();
     const router = useRouter();
     const [conversations, setConversations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -117,7 +119,7 @@ export default function MessagesInboxPage() {
                 <button onClick={() => router.back()} className="text-gray-400 hover:text-white">
                     <ChevronLeft size={24} />
                 </button>
-                <h1 className="font-bold text-lg">Messages</h1>
+                <h1 className="font-bold text-lg">{t('messages.title')}</h1>
             </header>
 
             {/* Search (Visual Only for MVP) -> Now Functional */}
@@ -126,7 +128,7 @@ export default function MessagesInboxPage() {
                     <Search size={18} className="text-gray-500" />
                     <input
                         type="text"
-                        placeholder="Search messages..."
+                        placeholder={t('messages.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="bg-transparent border-none focus:outline-none text-sm w-full"
@@ -141,7 +143,7 @@ export default function MessagesInboxPage() {
                         <div className="w-16 h-16 rounded-full bg-gray-900 flex items-center justify-center">
                             <MessageCircle size={32} className="opacity-20" />
                         </div>
-                        <p>No messages yet.</p>
+                        <p>{t('messages.noMessages')}</p>
                     </div>
                 )}
 
@@ -167,7 +169,7 @@ export default function MessagesInboxPage() {
                                         </span>
                                     </div>
                                     <p className="text-xs text-gray-400 truncate">
-                                        {conv.isMe && <span className="text-gray-600 mr-1">You:</span>}
+                                        {conv.isMe && <span className="text-gray-600 mr-1">{t('messages.you')}:</span>}
                                         {conv.lastMessage}
                                     </p>
                                 </div>
@@ -188,14 +190,14 @@ export default function MessagesInboxPage() {
                     <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
                         <div className="w-full max-w-md bg-gray-900 h-[80vh] sm:h-auto sm:max-h-[80vh] rounded-t-3xl sm:rounded-3xl border border-gray-800 flex flex-col shadow-2xl">
                             <div className="p-4 border-b border-gray-800 flex items-center justify-between">
-                                <h2 className="font-bold text-lg">New Message</h2>
+                                <h2 className="font-bold text-lg">{t('messages.newMessage')}</h2>
                                 <button onClick={() => setShowNewChat(false)} className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white">
                                     <X size={20} />
                                 </button>
                             </div>
 
                             <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
-                                <p className="text-xs text-gray-500 mb-2 font-bold uppercase tracking-wider">Following</p>
+                                <p className="text-xs text-gray-500 mb-2 font-bold uppercase tracking-wider">{t('messages.following')}</p>
                                 {followingList.length > 0 ? (
                                     <div className="space-y-1">
                                         {followingList.map((f: any) => (
@@ -217,7 +219,7 @@ export default function MessagesInboxPage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-10 text-gray-500">
-                                        <p>You aren't following anyone yet.</p>
+                                        <p>{t('messages.noFollowing')}</p>
                                     </div>
                                 )}
                             </div>
