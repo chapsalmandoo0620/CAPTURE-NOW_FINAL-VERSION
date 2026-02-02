@@ -342,28 +342,31 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
                             ))}
                         </div>
                     </div>
+                </div>
             </main>
 
             {/* Post Detail Modal (Read Only) */}
-            {selectedPost && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="w-full max-w-sm max-h-[90vh] bg-black rounded-3xl overflow-y-auto custom-scrollbar relative shadow-2xl border border-gray-800 flex flex-col">
-                        <button
-                            onClick={() => setSelectedPost(null)}
-                            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-                        >
-                            <X size={20} />
-                        </button>
-                        <FeedCard
-                            post={selectedPost}
-                            isModal={true}
-                            onUserClick={() => setSelectedPost(null)}
-                            currentUser={currentUser}
-                            onDelete={handlePostDelete}
-                        />
+            {
+                selectedPost && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="w-full max-w-sm max-h-[90vh] bg-black rounded-3xl overflow-y-auto custom-scrollbar relative shadow-2xl border border-gray-800 flex flex-col">
+                            <button
+                                onClick={() => setSelectedPost(null)}
+                                className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                            <FeedCard
+                                post={selectedPost}
+                                isModal={true}
+                                onUserClick={() => setSelectedPost(null)}
+                                currentUser={currentUser}
+                                onDelete={handlePostDelete}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
