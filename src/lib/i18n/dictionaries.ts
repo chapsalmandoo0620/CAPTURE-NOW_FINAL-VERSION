@@ -254,75 +254,54 @@ export const dictionaries: Record<Locale, any> = {
                     time: "Fri, 7:00 PM",
                 }
             },
-            menu: {
-                title: "Menu",
-                myActivity: "My Activity",
-                appInfo: "App Info",
-                bookmarks: "Bookmarks",
-                history: "Meeting History",
-                tutorial: "Tutorial",
-                announcements: "Announcements",
-                terms: "Terms of Service",
-                privacy: "Privacy Policy",
-                notifications: "Notifications",
-                logout: "Log Out",
-                deleteAccount: "Delete Account",
-                version: "CAPTURE NOW v1.0.0",
-                poweredBy: "Powered by Antigravity",
+        },
+        menu: {
+            title: "Menu",
+            myActivity: "My Activity",
+            appInfo: "App Info",
+            bookmarks: "Bookmarks",
+            history: "Meeting History",
+            tutorial: "Tutorial",
+            announcements: "Announcements",
+            terms: "Terms of Service",
+            privacy: "Privacy Policy",
+            notifications: "Notifications",
+            logout: "Log Out",
+            deleteAccount: "Delete Account",
+            version: "CAPTURE NOW v1.0.0",
+            poweredBy: "Powered by Antigravity",
+        },
+
+        onboarding: {
+            step1: {
+                title: "Setup Profile",
+                desc: "Let others know who you are.",
+                nickname: "Nickname",
+                bio: "Bio: Keep it short.",
+                location: "Main Location",
+                locationSearch: "Search area (e.g. Gangnam)",
+                optional: "(Optional)"
             },
-            auth: {
-                login: {
-                    title: "Welcome back, player.",
-                    email: "Email",
-                    password: "Password",
-                    signIn: "Sign In",
-                    signingIn: "Signing In...",
-                    noAccount: "Don't have an account? Create one",
-                    or: "Or continue with",
-                    google: "Sign in with Google",
-                    kakao: "Sign in with Kakao",
-                },
-                signup: {
-                    title: "Join the crew today.",
-                    email: "Email",
-                    password: "Password",
-                    createAccount: "Create Account",
-                    creating: "Creating...",
-                    hasAccount: "Already have an account? Sign in",
-                    success: "Account created! Please log in to set up your profile."
+            step2: {
+                title: "Your Sports",
+                desc: "Select sports you're interested in.",
+                add: "+ Add"
+            },
+            step3: {
+                title: "Your Vibe",
+                desc: "How do you like to play?",
+                skillLevel: "Skill Level per Sport",
+                noSports: "No sports selected.",
+                vibes: {
+                    fun: { label: "Fun", desc: "Just for fun & social." },
+                    hard: { label: "Hard", desc: "Serious training & winning." },
+                    grow: { label: "Grow", desc: "Learning & improving together." }
                 }
             },
-            onboarding: {
-                step1: {
-                    title: "Setup Profile",
-                    desc: "Let others know who you are.",
-                    nickname: "Nickname",
-                    bio: "Bio: Keep it short.",
-                    location: "Main Location",
-                    locationSearch: "Search area (e.g. Gangnam)",
-                    optional: "(Optional)"
-                },
-                step2: {
-                    title: "Your Sports",
-                    desc: "Select sports you're interested in.",
-                    add: "+ Add"
-                },
-                step3: {
-                    title: "Your Vibe",
-                    desc: "How do you like to play?",
-                    skillLevel: "Skill Level per Sport",
-                    noSports: "No sports selected.",
-                    vibes: {
-                        fun: { label: "Fun", desc: "Just for fun & social." },
-                        hard: { label: "Hard", desc: "Serious training & winning." },
-                        grow: { label: "Grow", desc: "Learning & improving together." }
-                    }
-                },
-                buttons: {
-                    next: "Next",
-                    processing: "Processing...",
-                    start: "Start Now"
-                }
+            buttons: {
+                next: "Next",
+                processing: "Processing...",
+                start: "Start Now"
             }
         },
     },
@@ -579,75 +558,54 @@ export const dictionaries: Record<Locale, any> = {
                     time: "금요일 오후 7:00",
                 }
             },
-            menu: {
-                title: "메뉴",
-                myActivity: "내 활동",
-                appInfo: "앱 정보",
-                bookmarks: "북마크",
-                history: "모임 기록",
-                tutorial: "튜토리얼",
-                announcements: "공지사항",
-                terms: "이용 약관",
-                privacy: "개인정보 처리방침",
-                notifications: "알림",
-                logout: "로그아웃",
-                deleteAccount: "계정 삭제",
-                version: "CAPTURE NOW v1.0.0",
-                poweredBy: "Powered by Antigravity",
+        },
+        menu: {
+            title: "메뉴",
+            myActivity: "내 활동",
+            appInfo: "앱 정보",
+            bookmarks: "북마크",
+            history: "모임 기록",
+            tutorial: "튜토리얼",
+            announcements: "공지사항",
+            terms: "이용 약관",
+            privacy: "개인정보 처리방침",
+            notifications: "알림",
+            logout: "로그아웃",
+            deleteAccount: "계정 삭제",
+            version: "CAPTURE NOW v1.0.0",
+            poweredBy: "Powered by Antigravity",
+        },
+
+        onboarding: {
+            step1: {
+                title: "프로필 설정",
+                desc: "자신을 소개해 주세요.",
+                nickname: "닉네임",
+                bio: "소개글: 짧게 입력해주세요.",
+                location: "주 활동 지역",
+                locationSearch: "지역 검색 (예: 강남)",
+                optional: "(선택)"
             },
-            auth: {
-                login: {
-                    title: "다시 오신 것을 환영합니다.",
-                    email: "이메일",
-                    password: "비밀번호",
-                    signIn: "로그인",
-                    signingIn: "로그인 중...",
-                    noAccount: "계정이 없으신가요? 회원가입",
-                    or: "또는",
-                    google: "Google로 계속하기",
-                    kakao: "카카오로 계속하기",
-                },
-                signup: {
-                    title: "지금 바로 참여하세요.",
-                    email: "이메일",
-                    password: "비밀번호",
-                    createAccount: "회원가입",
-                    creating: "생성 중...",
-                    hasAccount: "이미 계정이 있으신가요? 로그인",
-                    success: "계정이 생성되었습니다! 프로필 설정을 위해 다시 로그인해주세요."
+            step2: {
+                title: "관심 종목",
+                desc: "관심 있는 스포츠를 선택하세요.",
+                add: "+ 추가"
+            },
+            step3: {
+                title: "나의 스타일",
+                desc: "어떤 스타일로 즐기시나요?",
+                skillLevel: "종목별 실력",
+                noSports: "선택된 종목이 없습니다.",
+                vibes: {
+                    fun: { label: "즐겜", desc: "재미와 친목 위주" },
+                    hard: { label: "빡겜", desc: "진지한 훈련과 승부" },
+                    grow: { label: "성장", desc: "함께 배우고 발전하기" }
                 }
             },
-            onboarding: {
-                step1: {
-                    title: "프로필 설정",
-                    desc: "자신을 소개해 주세요.",
-                    nickname: "닉네임",
-                    bio: "소개글: 짧게 입력해주세요.",
-                    location: "주 활동 지역",
-                    locationSearch: "지역 검색 (예: 강남)",
-                    optional: "(선택)"
-                },
-                step2: {
-                    title: "관심 종목",
-                    desc: "관심 있는 스포츠를 선택하세요.",
-                    add: "+ 추가"
-                },
-                step3: {
-                    title: "나의 스타일",
-                    desc: "어떤 스타일로 즐기시나요?",
-                    skillLevel: "종목별 실력",
-                    noSports: "선택된 종목이 없습니다.",
-                    vibes: {
-                        fun: { label: "즐겜", desc: "재미와 친목 위주" },
-                        hard: { label: "빡겜", desc: "진지한 훈련과 승부" },
-                        grow: { label: "성장", desc: "함께 배우고 발전하기" }
-                    }
-                },
-                buttons: {
-                    next: "다음",
-                    processing: "처리 중...",
-                    start: "시작하기"
-                }
+            buttons: {
+                next: "다음",
+                processing: "처리 중...",
+                start: "시작하기"
             }
         },
     },
