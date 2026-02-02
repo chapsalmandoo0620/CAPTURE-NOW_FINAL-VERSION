@@ -215,6 +215,60 @@ export const dictionaries = {
             deleteAccount: "Delete Account",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+        },
+        auth: {
+            login: {
+                title: "Welcome back, player.",
+                email: "Email",
+                password: "Password",
+                signIn: "Sign In",
+                signingIn: "Signing In...",
+                noAccount: "Don't have an account? Create one",
+                or: "Or continue with",
+                google: "Sign in with Google",
+                kakao: "Sign in with Kakao",
+            },
+            signup: {
+                title: "Join the crew today.",
+                email: "Email",
+                password: "Password",
+                createAccount: "Create Account",
+                creating: "Creating...",
+                hasAccount: "Already have an account? Sign in",
+                success: "Account created! Please log in to set up your profile."
+            }
+        },
+        onboarding: {
+            step1: {
+                title: "Setup Profile",
+                desc: "Let others know who you are.",
+                nickname: "Nickname",
+                bio: "Bio: Keep it short.",
+                location: "Main Location",
+                locationSearch: "Search area (e.g. Gangnam)",
+                optional: "(Optional)"
+            },
+            step2: {
+                title: "Your Sports",
+                desc: "Select sports you're interested in.",
+                add: "+ Add"
+            },
+            step3: {
+                title: "Your Vibe",
+                desc: "How do you like to play?",
+                skillLevel: "Skill Level per Sport",
+                noSports: "No sports selected.",
+                vibes: {
+                    fun: { label: "Fun", desc: "Just for fun & social." },
+                    hard: { label: "Hard", desc: "Serious training & winning." },
+                    grow: { label: "Grow", desc: "Learning & improving together." }
+                }
+            },
+            buttons: {
+                next: "Next",
+                processing: "Processing...",
+                start: "Start Now"
+            }
         }
     },
     ko: {
@@ -431,6 +485,60 @@ export const dictionaries = {
             deleteAccount: "계정 삭제",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+        },
+        auth: {
+            login: {
+                title: "다시 오신 것을 환영합니다.",
+                email: "이메일",
+                password: "비밀번호",
+                signIn: "로그인",
+                signingIn: "로그인 중...",
+                noAccount: "계정이 없으신가요? 회원가입",
+                or: "또는",
+                google: "Google로 계속하기",
+                kakao: "카카오로 계속하기",
+            },
+            signup: {
+                title: "지금 바로 참여하세요.",
+                email: "이메일",
+                password: "비밀번호",
+                createAccount: "회원가입",
+                creating: "생성 중...",
+                hasAccount: "이미 계정이 있으신가요? 로그인",
+                success: "계정이 생성되었습니다! 프로필 설정을 위해 다시 로그인해주세요."
+            }
+        },
+        onboarding: {
+            step1: {
+                title: "프로필 설정",
+                desc: "자신을 소개해 주세요.",
+                nickname: "닉네임",
+                bio: "소개글: 짧게 입력해주세요.",
+                location: "주 활동 지역",
+                locationSearch: "지역 검색 (예: 강남)",
+                optional: "(선택)"
+            },
+            step2: {
+                title: "관심 종목",
+                desc: "관심 있는 스포츠를 선택하세요.",
+                add: "+ 추가"
+            },
+            step3: {
+                title: "나의 스타일",
+                desc: "어떤 스타일로 즐기시나요?",
+                skillLevel: "종목별 실력",
+                noSports: "선택된 종목이 없습니다.",
+                vibes: {
+                    fun: { label: "즐겜", desc: "재미와 친목 위주" },
+                    hard: { label: "빡겜", desc: "진지한 훈련과 승부" },
+                    grow: { label: "성장", desc: "함께 배우고 발전하기" }
+                }
+            },
+            buttons: {
+                next: "다음",
+                processing: "처리 중...",
+                start: "시작하기"
+            }
         }
     },
     ja: {
@@ -647,6 +755,60 @@ export const dictionaries = {
             deleteAccount: "アカウント削除",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+        },
+        auth: {
+            login: {
+                title: "お帰りなさい。",
+                email: "メールアドレス",
+                password: "パスワード",
+                signIn: "ログイン",
+                signingIn: "ログイン中...",
+                noAccount: "アカウントをお持ちでないですか？ 作成",
+                or: "または",
+                google: "Googleで続ける",
+                kakao: "Kakaoで続ける",
+            },
+            signup: {
+                title: "今すぐコミュニティに参加しよう。",
+                email: "メールアドレス",
+                password: "パスワード",
+                createAccount: "アカウント作成",
+                creating: "作成中...",
+                hasAccount: "すでにアカウントをお持ちですか？ ログイン",
+                success: "アカウントが作成されました！ プロフィール設定のためにログインしてください。"
+            }
+        },
+        onboarding: {
+            step1: {
+                title: "プロフィール設定",
+                desc: "あなたについて教えてください。",
+                nickname: "ニックネーム",
+                bio: "自己紹介: 短く入力してください。",
+                location: "主な活動エリア",
+                locationSearch: "エリア検索 (例: 渋谷)",
+                optional: "(任意)"
+            },
+            step2: {
+                title: "興味のあるスポーツ",
+                desc: "興味のあるスポーツを選択してください。",
+                add: "+ 追加"
+            },
+            step3: {
+                title: "プレイスタイル",
+                desc: "どのように楽しみますか？",
+                skillLevel: "スポーツ別レベル",
+                noSports: "選択されたスポーツがありません。",
+                vibes: {
+                    fun: { label: "エンジョイ", desc: "楽しみと交流重視" },
+                    hard: { label: "ガチ", desc: "本気のトレーニングと勝負" },
+                    grow: { label: "成長", desc: "共に学び、成長する" }
+                }
+            },
+            buttons: {
+                next: "次へ",
+                processing: "処理中...",
+                start: "始める"
+            }
         }
     },
     zh: {
@@ -863,6 +1025,60 @@ export const dictionaries = {
             deleteAccount: "删除账户",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+        },
+        auth: {
+            login: {
+                title: "欢迎回来。",
+                email: "邮箱",
+                password: "密码",
+                signIn: "登录",
+                signingIn: "登录中...",
+                noAccount: "还没有账号？ 注册",
+                or: "或通过以下方式继续",
+                google: "通过 Google 登录",
+                kakao: "通过 Kakao 登录",
+            },
+            signup: {
+                title: "立即加入我们。",
+                email: "邮箱",
+                password: "密码",
+                createAccount: "创建账号",
+                creating: "创建中...",
+                hasAccount: "已有账号？ 登录",
+                success: "账号创建成功！ 请登录以设置个人资料。"
+            }
+        },
+        onboarding: {
+            step1: {
+                title: "设置资料",
+                desc: "让大家认识你。",
+                nickname: "昵称",
+                bio: "简介：请简短介绍。",
+                location: "主要活动区域",
+                locationSearch: "搜索区域 (如: 江南)",
+                optional: "(可选)"
+            },
+            step2: {
+                title: "感兴趣的运动",
+                desc: "选择你感兴趣的运动。",
+                add: "+ 添加"
+            },
+            step3: {
+                title: "运动风格",
+                desc: "你喜欢的运动方式？",
+                skillLevel: "各项目水平",
+                noSports: "未选择运动。",
+                vibes: {
+                    fun: { label: "娱乐", desc: "注重乐趣与社交" },
+                    hard: { label: "竞技", desc: "认真的训练与比赛" },
+                    grow: { label: "成长", desc: "共同学习与进步" }
+                }
+            },
+            buttons: {
+                next: "下一步",
+                processing: "处理中...",
+                start: "开始"
+            }
         }
     }
 };

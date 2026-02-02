@@ -5,6 +5,9 @@ import { Camera, MapPin, Check, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import LocationPicker from '@/components/location-picker';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
+import AuthLanguageSwitcher from '@/components/auth-language-switcher';
 
 const SPORTS = [
     'Run', 'Cycle', 'Soccer', 'Basketball', 'Tennis',
@@ -14,6 +17,12 @@ const SPORTS = [
 
 export default function OnboardingPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].onboarding;
+    const tCommon = dictionaries[language].common;
+    const tCategories = dictionaries[language].meetup.categories;
+    const tLevels = dictionaries[language].meetup.levels;
+
     const [step, setStep] = useState(1);
 
     // Form State
@@ -37,6 +46,23 @@ export default function OnboardingPage() {
             setAvatarFile(file);
             setAvatarPreview(URL.createObjectURL(file));
         }
+    };
+
+    const getSportLabel = (sport: string) => {
+        const map: Record<string, string> = {
+            'Run': tCategories.running,
+            'Cycle': tCategories.cycling,
+            'Soccer': tCategories.soccer,
+            'Basketball': tCategories.basketball,
+            'Tennis': tCategories.tennis,
+            'Golf': tCategories.golf,
+            'Climb': tCategories.climbing,
+            'Fitness': tCategories.fitness,
+            'Yoga': tCategories.yoga,
+            'Swim': tCategories.swimming,
+            'Hike': tCategories.hiking,
+        };
+        return map[sport] || sport;
     };
 
     const handleLocationSelect = (lat: number, lng: number, address?: string) => {
@@ -140,7 +166,8 @@ export default function OnboardingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white p-6 pb-24">
+        <div className="min-h-screen bg-black text-white p-6 pb-24 relative">
+            <AuthLanguageSwitcher />
             <div className="max-w-md mx-auto space-y-8">
 
                 {/* Progress */}
@@ -153,14 +180,14 @@ export default function OnboardingPage() {
                 {/* Header */}
                 <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tight">
-                        {step === 1 && "Setup Profile"}
-                        {step === 2 && "Your Sports"}
-                        {step === 3 && "Your Vibe"}
+                        {step === 1 && t.step1.title}
+                        {step === 2 && t.step2.title}
+                        {step === 3 && t.step3.title}
                     </h1>
                     <p className="text-gray-400">
-                        {step === 1 && "Let others know who you are."}
-                        {step === 2 && "Select sports you're interested in."}
-                        {step === 3 && "How do you like to play?"}
+                        {step === 1 && t.step1.desc}
+                        {step === 2 && t.step2.desc}
+                        {step === 3 && t.step3.desc}
                     </p>
                 </div>
 
@@ -179,26 +206,26 @@ export default function OnboardingPage() {
                                 </div>
                                 <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                             </label>
-                            <span className="text-xs text-gray-500">(Optional)</span>
+                            <span className="text-xs text-gray-500">{t.step1.optional}</span>
                         </div>
 
                         <div className="space-y-4">
                             <input
                                 type="text"
-                                placeholder="Nickname"
+                                placeholder={t.step1.nickname}
                                 value={nickname}
                                 onChange={(e) => setNickname(e.target.value)}
                                 className="w-full bg-gray-900 border-gray-800 rounded-xl p-4 text-white focus:border-neon-green focus:outline-none"
                             />
                             <textarea
-                                placeholder="Bio: Keep it short."
+                                placeholder={t.step1.bio}
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 className="w-full bg-gray-900 border-gray-800 rounded-xl p-4 text-white resize-none h-24 focus:border-neon-green focus:outline-none"
                             />
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-400">Main Location</label>
+                                <label className="text-sm font-medium text-gray-400">{t.step1.location}</label>
 
                                 <LocationPicker onLocationSelect={handleLocationSelect} />
 
@@ -206,7 +233,7 @@ export default function OnboardingPage() {
                                     <MapPin className="absolute top-4 left-4 text-gray-500" size={20} />
                                     <input
                                         type="text"
-                                        placeholder="Search area (e.g. Gangnam)"
+                                        placeholder={t.step1.locationSearch}
                                         value={location}
                                         onChange={(e) => setLocation(e.target.value)}
                                         className="w-full bg-gray-900 border-gray-800 rounded-xl p-4 pl-12 text-white focus:border-neon-green focus:outline-none"
@@ -229,11 +256,11 @@ export default function OnboardingPage() {
                                     : 'bg-gray-900 text-gray-400 border-gray-800 hover:border-gray-700'
                                     }`}
                             >
-                                {sport}
+                                {getSportLabel(sport)}
                             </button>
                         ))}
                         <button className="p-4 rounded-xl text-sm font-medium border border-gray-800 border-dashed text-gray-500 bg-transparent">
-                            + Add
+                            {t.step2.add}
                         </button>
                     </div>
                 )}
@@ -242,14 +269,15 @@ export default function OnboardingPage() {
                 {step === 3 && (
                     <div className="space-y-8">
                         <div className="space-y-4">
-                            <h3 className="font-bold mb-4">Skill Level per Sport</h3>
-                            {selectedInterests.length === 0 && <p className="text-gray-500">No sports selected.</p>}
+                            <h3 className="font-bold mb-4">{t.step3.skillLevel}</h3>
+                            {selectedInterests.length === 0 && <p className="text-gray-500">{t.step3.noSports}</p>}
                             {selectedInterests.map(sport => (
                                 <div key={sport} className="space-y-2">
-                                    <label className="text-sm text-neon-green font-bold">{sport}</label>
+                                    <label className="text-sm text-neon-green font-bold">{getSportLabel(sport)}</label>
                                     <div className="flex gap-2">
                                         {['Beginner', 'Intermediate', 'Advanced'].map(level => {
                                             const currentLevel = skillLevels[sport] || 'Beginner';
+                                            const displayLevel = level === 'Beginner' ? tLevels.beginner : (level === 'Intermediate' ? tLevels.intermediate : tLevels.advanced);
                                             return (
                                                 <button
                                                     key={level}
@@ -259,7 +287,7 @@ export default function OnboardingPage() {
                                                         : 'bg-gray-900 text-gray-500 border-gray-800 hover:border-gray-700'
                                                         }`}
                                                 >
-                                                    {level}
+                                                    {displayLevel}
                                                 </button>
                                             );
                                         })}
@@ -269,11 +297,11 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className="space-y-4 pt-4 border-t border-gray-800">
-                            <h3 className="font-bold">Your Vibe</h3>
+                            <h3 className="font-bold">{t.step3.title}</h3>
                             {[
-                                { id: 'fun', label: 'Fun (즐겜)', desc: 'Just for fun & social.' },
-                                { id: 'hard', label: 'Hard (빡겜)', desc: 'Serious training & winning.' },
-                                { id: 'grow', label: 'Grow (성장)', desc: 'Learning & improving together.' }
+                                { id: 'fun', label: t.step3.vibes.fun.label, desc: t.step3.vibes.fun.desc },
+                                { id: 'hard', label: t.step3.vibes.hard.label, desc: t.step3.vibes.hard.desc },
+                                { id: 'grow', label: t.step3.vibes.grow.label, desc: t.step3.vibes.grow.desc }
                             ].map(item => (
                                 <button
                                     key={item.id}
@@ -298,7 +326,7 @@ export default function OnboardingPage() {
                 <div className="fixed bottom-0 left-0 right-0 p-4 bg-black border-t border-gray-900">
                     <div className="max-w-md mx-auto">
                         <button onClick={handleNext} disabled={loading} className="btn-neon w-full flex items-center justify-center gap-2 disabled:opacity-50">
-                            {loading ? 'Processing...' : (step === 3 ? 'Start Now' : 'Next')}
+                            {loading ? t.buttons.processing : (step === 3 ? t.buttons.start : t.buttons.next)}
                             {!loading && <ChevronRight size={20} />}
                         </button>
                     </div>

@@ -6,9 +6,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, CircuitBoard } from 'lucide-react';
 import { GoogleSignInButton, KakaoSignInButton } from '@/components/social-login-buttons';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
+import AuthLanguageSwitcher from '@/components/auth-language-switcher';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].auth.login;
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -98,6 +103,8 @@ export default function LoginPage() {
                 <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500 rounded-full blur-[80px]" />
             </div>
 
+            <AuthLanguageSwitcher />
+
             <div className="w-full max-w-md z-10 space-y-8">
                 {/* Logo / Header */}
                 <div className="text-center space-y-4 flex flex-col items-center">
@@ -108,7 +115,7 @@ export default function LoginPage() {
             CAPTURE <span className="text-neon-green">NOW</span>
           </h1> */}
                     <p className="text-gray-400">
-                        Welcome back, player.
+                        {t.title}
                     </p>
                 </div>
 
@@ -116,7 +123,7 @@ export default function LoginPage() {
                 <div className="bg-gray-900/50 backdrop-blur-md border border-gray-800 rounded-2xl p-8 space-y-6">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300">Email</label>
+                            <label className="text-sm font-medium text-gray-300">{t.email}</label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
                                 <input
@@ -131,7 +138,7 @@ export default function LoginPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300">Password</label>
+                            <label className="text-sm font-medium text-gray-300">{t.password}</label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
                                 <input
@@ -146,7 +153,7 @@ export default function LoginPage() {
                         </div>
 
                         <button type="submit" disabled={loading} className="btn-neon w-full mt-2 disabled:opacity-50">
-                            {loading ? 'Signing In...' : 'Sign In'}
+                            {loading ? t.signingIn : t.signIn}
                         </button>
                     </form>
 
@@ -156,7 +163,7 @@ export default function LoginPage() {
                             <div className="w-full border-t border-gray-800"></div>
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-gray-900 px-2 text-gray-500 rounded-full">Or continue with</span>
+                            <span className="bg-gray-900 px-2 text-gray-500 rounded-full">{t.or}</span>
                         </div>
                     </div>
 
@@ -165,8 +172,8 @@ export default function LoginPage() {
 
 
                     <div className="space-y-3">
-                        <GoogleSignInButton onClick={() => handleSocialLogin('google')} />
-                        <KakaoSignInButton onClick={() => handleSocialLogin('kakao')} />
+                        <GoogleSignInButton onClick={() => handleSocialLogin('google')} label={t.google} />
+                        <KakaoSignInButton onClick={() => handleSocialLogin('kakao')} label={t.kakao} />
                     </div>
                 </div>
 
@@ -176,7 +183,7 @@ export default function LoginPage() {
                         href="/signup"
                         className="text-sm text-gray-400 hover:text-neon-green transition-colors"
                     >
-                        Don't have an account? Create one
+                        {t.noAccount}
                     </Link>
                 </div>
             </div>
