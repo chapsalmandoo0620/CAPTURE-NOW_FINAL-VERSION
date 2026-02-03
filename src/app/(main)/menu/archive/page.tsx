@@ -4,9 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Calendar, MapPin, Award } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useLanguage } from '@/context/language-context';
+import { dictionaries } from '@/lib/i18n/dictionaries';
 
 export default function ArchivePage() {
     const router = useRouter();
+    const { language } = useLanguage();
+    const t = dictionaries[language].common;
+    const tMenu = dictionaries[language].menu;
+
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,7 +41,7 @@ export default function ArchivePage() {
                         id: m.id,
                         title: m.title,
                         date: new Date(m.start_time).toLocaleDateString(),
-                        loc: m.location_name || 'Unknown',
+                        loc: m.location_name || t.unknown,
                         sport: m.category || 'Event'
                     })));
                 }
@@ -51,12 +57,12 @@ export default function ArchivePage() {
                 <button onClick={() => router.back()} className="text-gray-400 hover:text-white">
                     <ChevronLeft size={28} />
                 </button>
-                <h1 className="font-bold text-lg">My Meetup History</h1>
+                <h1 className="font-bold text-lg">{tMenu.history}</h1>
             </header>
 
             <main className="p-4 space-y-4">
                 {loading ? (
-                    <div className="text-center text-gray-500 py-10">Loading history...</div>
+                    <div className="text-center text-gray-500 py-10">{t.loading}</div>
                 ) : history.length > 0 ? (
                     history.map((meet) => (
                         <div key={meet.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex gap-4">
@@ -82,7 +88,7 @@ export default function ArchivePage() {
                 ) : (
                     <div className="text-center text-gray-500 py-10 space-y-2">
                         <Award size={48} className="mx-auto opacity-20" />
-                        <p>No finished meetups yet.</p>
+                        <p>{tMenu.noHistory}</p>
                     </div>
                 )}
             </main>

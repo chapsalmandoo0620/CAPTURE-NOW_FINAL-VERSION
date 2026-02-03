@@ -133,6 +133,9 @@ export default function LoginPage() {
                                     placeholder="name@example.com"
                                     className="w-full bg-gray-800 border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-neon-green focus:ring-1 focus:ring-neon-green transition-all"
                                     required
+                                    autoCapitalize="none"
+                                    autoCorrect="off"
+                                    spellCheck={false}
                                 />
                             </div>
                         </div>
@@ -148,6 +151,8 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                     className="w-full bg-gray-800 border border-gray-700 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:border-neon-green focus:ring-1 focus:ring-neon-green transition-all"
                                     required
+                                    autoCapitalize="none"
+                                    autoCorrect="off"
                                 />
                             </div>
                         </div>

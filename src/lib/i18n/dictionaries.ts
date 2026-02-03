@@ -19,6 +19,7 @@ export const dictionaries: Record<Locale, any> = {
             comments: "Comments",
             share: "Share",
             copyLink: "Link copied to clipboard!",
+            unknown: "Unknown"
         },
         nav: {
             home: "Home",
@@ -270,6 +271,7 @@ export const dictionaries: Record<Locale, any> = {
             deleteAccount: "Delete Account",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+            noHistory: "No finished meetups yet."
         },
 
         onboarding: {
@@ -323,6 +325,7 @@ export const dictionaries: Record<Locale, any> = {
             comments: "댓글",
             share: "공유",
             copyLink: "링크가 복사되었습니다!",
+            unknown: "알 수 없음"
         },
         nav: {
             home: "홈",
@@ -574,6 +577,7 @@ export const dictionaries: Record<Locale, any> = {
             deleteAccount: "계정 삭제",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+            noHistory: "종료된 모임이 없습니다."
         },
 
         onboarding: {
@@ -627,6 +631,7 @@ export const dictionaries: Record<Locale, any> = {
             comments: "コメント",
             share: "共有",
             copyLink: "リンクをコピーしました！",
+            unknown: "不明"
         },
         nav: {
             home: "ホーム",
@@ -878,6 +883,7 @@ export const dictionaries: Record<Locale, any> = {
             deleteAccount: "アカウント削除",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+            noHistory: "終了した集まりはまだありません。"
         },
 
         onboarding: {
@@ -931,6 +937,7 @@ export const dictionaries: Record<Locale, any> = {
             comments: "评论",
             share: "分享",
             copyLink: "链接已复制到剪贴板！",
+            unknown: "未知"
         },
         nav: {
             home: "首页",
@@ -1182,6 +1189,7 @@ export const dictionaries: Record<Locale, any> = {
             deleteAccount: "删除账户",
             version: "CAPTURE NOW v1.0.0",
             poweredBy: "Powered by Antigravity",
+            noHistory: "暂无已结束的聚会。"
         },
 
         onboarding: {

@@ -106,7 +106,7 @@ export default function HistoryPage() {
                                                 {isHost && <span className="text-[10px] text-neon-green border border-neon-green px-1 rounded">HOST</span>}
                                             </h3>
                                             <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.location_name || t.search}</span>
+                                                <span className="flex items-center gap-0.5"><MapPin size={10} /> {meet.location_name || t.unknown}</span>
                                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-600"></span>
                                                 <span>{meet.category}</span>
                                             </div>
