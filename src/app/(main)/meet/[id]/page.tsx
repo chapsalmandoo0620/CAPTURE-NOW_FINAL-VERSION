@@ -436,7 +436,12 @@ export default function MeetDetailPage({ params }: { params: Promise<{ id: strin
     );
 
     // Localization: Sport/Level mapping
-    const displaySport = meetData.sport ? (t(`meetup.categories.${meetData.sport.toLowerCase()}`) || meetData.sport) : '';
+    const lowerSport = meetData.sport?.toLowerCase();
+    const displaySport = meetData.sport
+        ? (t(`meetup.categories.${lowerSport}`) !== `meetup.categories.${lowerSport}`
+            ? t(`meetup.categories.${lowerSport}`)
+            : meetData.sport)
+        : '';
     const displayLevel = meetData.level ? (t(`meetup.levels.${meetData.level.toLowerCase()}`) || meetData.level) : '';
 
     return (

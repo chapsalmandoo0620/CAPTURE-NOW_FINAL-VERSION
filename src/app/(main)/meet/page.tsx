@@ -652,7 +652,11 @@ export default function MeetPage() {
                             const isExpired = meet.rawEndTime && new Date(meet.rawEndTime) < new Date();
 
                             // Localization for Sport (for display on card)
-                            const displaySport = t(`meetup.categories.${meet.sport.toLowerCase()}`) || meet.sport;
+                            const lowerSport = meet.sport.toLowerCase();
+                            const displaySport = t(`meetup.categories.${lowerSport}`) !== `meetup.categories.${lowerSport}`
+                                ? t(`meetup.categories.${lowerSport}`)
+                                : meet.sport;
+
                             const displayLevel = t(`meetup.levels.${meet.level?.toLowerCase()}`) || meet.level;
 
                             return (

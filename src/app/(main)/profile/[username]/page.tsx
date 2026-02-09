@@ -283,11 +283,22 @@ export default function PublicProfilePage({ params }: { params: Promise<{ userna
 
                             {/* Sports & Vibe */}
                             <div className="flex flex-wrap gap-2 pt-1">
-                                {profileUser.sports.map((sport: any, idx: number) => (
-                                    <span key={idx} className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 border border-gray-700 font-medium">
-                                        {sport.name} <span className="text-neon-green ml-1">{sport.level}</span>
-                                    </span>
-                                ))}
+                                {profileUser.sports.map((sport: any, idx: number) => {
+                                    const lowerName = sport.name.toLowerCase();
+                                    // Handle Localization Safely
+                                    let displayName = tMeetup.categories[lowerName as keyof typeof tMeetup.categories];
+
+                                    // If not found in dictionary, or if it returns undefined/null, use original
+                                    if (!displayName) {
+                                        displayName = sport.name;
+                                    }
+
+                                    return (
+                                        <span key={idx} className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 border border-gray-700 font-medium">
+                                            {displayName} <span className="text-neon-green ml-1">{(tMeetup.levels as any)[sport.level?.toLowerCase()] || sport.level}</span>
+                                        </span>
+                                    )
+                                })}
                                 <span className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-400 border border-gray-700 italic">
                                     {profileUser.vibe}
                                 </span>
