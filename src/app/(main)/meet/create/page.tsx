@@ -32,6 +32,8 @@ export default function CreateMeetPage() {
         vibe: 'Fun'
     });
 
+    const [isAddingCustom, setIsAddingCustom] = useState(false);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -139,7 +141,10 @@ export default function CreateMeetPage() {
                                 <button
                                     key={sport}
                                     type="button"
-                                    onClick={() => toggleSport(sport)}
+                                    onClick={() => {
+                                        toggleSport(sport);
+                                        setIsAddingCustom(false);
+                                    }}
                                     className={`py-3 rounded-xl text-sm font-bold border transition-all ${formData.sport === sport
                                         ? 'bg-neon-green text-black border-neon-green'
                                         : 'bg-gray-900 text-gray-400 border-gray-800 hover:bg-gray-800'
@@ -148,6 +153,41 @@ export default function CreateMeetPage() {
                                     {sport}
                                 </button>
                             ))}
+
+                            {/* Render Custom Sport if Selected and not in List */}
+                            {!SPORTS_LIST.includes(formData.sport) && !isAddingCustom && formData.sport && (
+                                <button
+                                    type="button"
+                                    className="py-3 rounded-xl text-sm font-bold border transition-all bg-neon-green text-black border-neon-green"
+                                    onClick={() => setIsAddingCustom(true)}
+                                >
+                                    {formData.sport}
+                                </button>
+                            )}
+
+                            {/* Custom Input */}
+                            {isAddingCustom ? (
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    placeholder="Type Sport..."
+                                    className="py-3 px-2 rounded-xl text-sm font-bold bg-gray-800 text-white border border-neon-green focus:outline-none"
+                                    value={formData.sport}
+                                    onChange={(e) => setFormData({ ...formData, sport: e.target.value })}
+                                    onBlur={() => { if (!formData.sport) setIsAddingCustom(false); }}
+                                />
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsAddingCustom(true);
+                                        setFormData({ ...formData, sport: '' }); // Clear to type
+                                    }}
+                                    className={`py-3 rounded-xl text-sm font-medium border border-gray-800 border-dashed text-gray-500 bg-transparent hover:border-gray-600 hover:text-white transition-colors ${!SPORTS_LIST.includes(formData.sport) && formData.sport ? 'hidden' : ''}`}
+                                >
+                                    + Custom
+                                </button>
+                            )}
                         </div>
                     </div>
 

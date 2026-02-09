@@ -184,22 +184,22 @@ export default function TutorialOverlay({ onComplete, isNewUser }: TutorialOverl
             {/* Skip Button */}
             <button
                 onClick={handleSkip}
-                className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors text-sm font-medium flex items-center gap-1 px-3 py-1 bg-gray-900 rounded-full border border-gray-800"
+                className="absolute top-4 right-4 z-50 text-gray-500 hover:text-white transition-colors text-sm font-medium flex items-center gap-1 px-3 py-1 bg-gray-900/80 rounded-full border border-gray-800"
             >
                 {t('common.skip')} <X size={14} />
             </button>
 
             {/* Main Card */}
-            <div className="w-full max-w-4xl bg-gray-900/40 border border-gray-800 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[500px]">
+            <div className="w-full max-w-4xl bg-gray-900/40 border border-gray-800 rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] md:max-h-none overflow-y-auto md:overflow-visible">
 
-                {/* Left Side: Visuals (40%) */}
-                <div className="relative w-full md:w-5/12 bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col items-center justify-center p-8 border-b md:border-b-0 md:border-r border-gray-800 group">
+                {/* Left Side: Visuals (Mobile: Smaller, Top) */}
+                <div className="relative w-full md:w-5/12 bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col items-center justify-center p-6 md:p-8 border-b md:border-b-0 md:border-r border-gray-800 group shrink-0">
                     {/* Background Glow */}
                     <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20 transition-colors duration-500 ${step.color.replace('text-', 'bg-')}`}></div>
 
                     {/* Icon Container */}
-                    <div className="relative z-10 w-32 h-32 rounded-full bg-gray-800/80 border border-gray-700/50 flex items-center justify-center shadow-lg mb-6 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105">
-                        <Icon size={64} className={`transition-all duration-300 ${step.color} drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]`} />
+                    <div className="relative z-10 w-20 h-20 md:w-32 md:h-32 rounded-full bg-gray-800/80 border border-gray-700/50 flex items-center justify-center shadow-lg mb-4 md:mb-6 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105">
+                        <Icon className={`w-10 h-10 md:w-16 md:h-16 transition-all duration-300 ${step.color} drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]`} />
                     </div>
 
                     {/* Step Indicator (Visual dots for mobile mainly) */}
@@ -210,37 +210,37 @@ export default function TutorialOverlay({ onComplete, isNewUser }: TutorialOverl
                     </div>
                 </div>
 
-                {/* Right Side: Content (60%) */}
-                <div className="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-between relative bg-black/20">
+                {/* Right Side: Content (Mobile: Scrollable if needed) */}
+                <div className="w-full md:w-7/12 p-6 md:p-12 flex flex-col justify-between relative bg-black/20">
 
                     <div>
                         {/* Step Counter */}
-                        <div className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
+                        <div className="text-[10px] md:text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">
                             Step {currentStep + 1} / {STEPS.length}
                         </div>
 
                         {/* Title */}
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">
+                        <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 leading-tight">
                             {step.title}
                             {step.titleAccent && <span className="text-neon-green block">{step.titleAccent}</span>}
                         </h2>
 
                         {/* Description */}
-                        <p className="text-gray-400 text-lg leading-relaxed mb-8">
+                        <p className="text-gray-400 text-sm md:text-lg leading-relaxed mb-6 md:mb-8">
                             {step.desc}
                         </p>
 
                         {/* Interactive Content / Visual Cue Area */}
                         {step.content && (
-                            <div className="mb-8 animate-in slide-in-from-bottom-2 fade-in duration-500">
-                                <div className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-2">Preview</div>
+                            <div className="mb-6 md:mb-8 animate-in slide-in-from-bottom-2 fade-in duration-500">
+                                <div className="text-[10px] md:text-xs text-gray-500 uppercase tracking-wider font-bold mb-2">Preview</div>
                                 {step.content}
                             </div>
                         )}
                     </div>
 
                     {/* Navigation Buttons */}
-                    <div className="mt-auto pt-4 flex items-center justify-between">
+                    <div className="mt-auto pt-4 flex items-center justify-between sticky bottom-0 bg-transparent md:static">
 
                         {/* Desktop Dots */}
                         <div className="hidden md:flex gap-2">
@@ -256,7 +256,7 @@ export default function TutorialOverlay({ onComplete, isNewUser }: TutorialOverl
 
                         <button
                             onClick={handleNext}
-                            className="btn-neon px-8 py-3 rounded-xl font-bold flex items-center gap-2 group ml-auto transition-all hover:scale-105"
+                            className="btn-neon w-full md:w-auto px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 group ml-auto transition-all hover:scale-105"
                         >
                             {currentStep === STEPS.length - 1 ? t('common.start') : t('common.next')}
                             <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />

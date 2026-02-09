@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, MapPin, Check, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -11,7 +11,7 @@ import AuthLanguageSwitcher from '@/components/auth-language-switcher';
 
 const SPORTS = [
     'Run', 'Cycle', 'Soccer', 'Basketball', 'Tennis',
-    'Golf', 'Climb', 'Fitness', 'Yoga', 'Swim',
+    'Baseball', 'Golf', 'Climb', 'Fitness', 'Yoga', 'Swim',
     'Hike', 'Skate', 'Surf', 'Badminton'
 ];
 
@@ -35,10 +35,45 @@ export default function OnboardingPage() {
     const [skillLevels, setSkillLevels] = useState<Record<string, string>>({});
     const [vibe, setVibe] = useState('');
 
+    // Custom Sport State
+    const [isAddingCustom, setIsAddingCustom] = useState(false);
+    const [customSport, setCustomSport] = useState('');
+
     // File Upload State
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+
+    // Persistence: Load Draft
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('onboarding_draft');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.nickname) setNickname(parsed.nickname);
+                if (parsed.bio) setBio(parsed.bio);
+                if (parsed.location) setLocation(parsed.location);
+                if (parsed.latitude) setLatitude(parsed.latitude);
+                if (parsed.longitude) setLongitude(parsed.longitude);
+                if (parsed.selectedInterests) setSelectedInterests(parsed.selectedInterests);
+                if (parsed.skillLevels) setSkillLevels(parsed.skillLevels);
+                if (parsed.vibe) setVibe(parsed.vibe);
+                if (parsed.step) setStep(parsed.step);
+            }
+        } catch (e) {
+            console.error("Failed to load draft", e);
+        }
+    }, []);
+
+    // Persistence: Save Draft
+    useEffect(() => {
+        const draft = {
+            nickname, bio, location, latitude, longitude,
+            selectedInterests, skillLevels, vibe, step
+        };
+        localStorage.setItem('onboarding_draft', JSON.stringify(draft));
+    }, [nickname, bio, location, latitude, longitude, selectedInterests, skillLevels, vibe, step]);
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -49,20 +84,48 @@ export default function OnboardingPage() {
     };
 
     const getSportLabel = (sport: string) => {
+        // First try dictionary lookup using lowercase key
+        const lowerKey = sport.toLowerCase();
+        // Check if dictionary has this key (handling potential missing keys safely)
+        if (tCategories[lowerKey as keyof typeof tCategories]) {
+            return tCategories[lowerKey as keyof typeof tCategories];
+        }
+
+        // Fallback or specific manual mapping if dictionary keys differ from SPORTS array values
         const map: Record<string, string> = {
             'Run': tCategories.running,
             'Cycle': tCategories.cycling,
             'Soccer': tCategories.soccer,
             'Basketball': tCategories.basketball,
             'Tennis': tCategories.tennis,
+            'Baseball': tCategories.baseball,
             'Golf': tCategories.golf,
             'Climb': tCategories.climbing,
             'Fitness': tCategories.fitness,
             'Yoga': tCategories.yoga,
             'Swim': tCategories.swimming,
             'Hike': tCategories.hiking,
+            'Skate': tCategories.skateboard,
+            'Surf': tCategories.surfing,
+            'Badminton': tCategories.badminton
         };
         return map[sport] || sport;
+    };
+
+    const handleAddCustomSport = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (customSport.trim()) {
+            const newSport = customSport.trim();
+            // Capitalize first letter strictly? Or just take as is. 
+            // Let's capitalize first for consistency looks.
+            const formatted = newSport.charAt(0).toUpperCase() + newSport.slice(1);
+
+            setSelectedInterests(prev =>
+                prev.includes(formatted) ? prev : [...prev, formatted]
+            );
+            setCustomSport('');
+            setIsAddingCustom(false);
+        }
     };
 
     const handleLocationSelect = (lat: number, lng: number, address?: string) => {
@@ -140,6 +203,7 @@ export default function OnboardingPage() {
             localStorage.removeItem('my_created_meets');
             localStorage.removeItem('my_meeting_scores');
             localStorage.removeItem('my_profile'); // Ensure we rely on DB fetch
+            localStorage.removeItem('onboarding_draft'); // Clear draft
 
             // Set Auth Flag (Optional, depending on middleware usage)
             localStorage.setItem('capture_now_auth', 'true');
@@ -259,9 +323,40 @@ export default function OnboardingPage() {
                                 {getSportLabel(sport)}
                             </button>
                         ))}
-                        <button className="p-4 rounded-xl text-sm font-medium border border-gray-800 border-dashed text-gray-500 bg-transparent">
-                            {t.step2.add}
-                        </button>
+                        {/* Render User Added Sports that are NOT in the default SPORTS list */}
+                        {selectedInterests
+                            .filter(s => !SPORTS.includes(s))
+                            .map(sport => (
+                                <button
+                                    key={sport}
+                                    onClick={() => toggleInterest(sport)}
+                                    className="p-4 rounded-xl text-sm font-bold border transition-all bg-neon-green text-black border-neon-green"
+                                >
+                                    {sport}
+                                </button>
+                            ))}
+
+                        {/* Add Button / Input */}
+                        {isAddingCustom ? (
+                            <form onSubmit={handleAddCustomSport} className="col-span-1">
+                                <input
+                                    autoFocus
+                                    className="w-full h-full p-4 rounded-xl text-sm font-medium bg-gray-800 text-white border border-neon-green focus:outline-none placeholder:text-gray-500"
+                                    placeholder="Type..."
+                                    value={customSport}
+                                    onChange={(e) => setCustomSport(e.target.value)}
+                                    onBlur={() => { if (!customSport) setIsAddingCustom(false); }}
+                                />
+                            </form>
+                        ) : (
+                            <button
+                                onClick={() => setIsAddingCustom(true)}
+                                className="p-4 rounded-xl text-sm font-medium border border-gray-800 border-dashed text-gray-500 bg-transparent hover:border-gray-600 hover:text-white transition-colors"
+                            >
+                                {t.step2.add}
+                            </button>
+                        )}
+
                     </div>
                 )}
 
